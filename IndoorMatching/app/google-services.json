@@ -1,0 +1,35 @@
+{
+  "project_info": {
+    "project_number": "271588995849",
+    "firebase_url": "https://indoor-matching.firebaseio.com",
+    "project_id": "indoor-matching",
+    "storage_bucket": "indoor-matching.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:271588995849:android:94c47146ce6e8235",
+        "android_client_info": {
+          "package_name": "com.mdaraujo.indoormatching"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDUDFtzDbMJEYxBFU7nrqHf6zJCzL_rtec"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "271588995849-mkrn6jh9mj89vvtsndkm72hl6unt5d21.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
