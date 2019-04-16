@@ -8,11 +8,12 @@ import android.widget.TextView;
 
 import java.util.Locale;
 
-public class BeaconViewHolder extends RecyclerView.ViewHolder {
+public class BeaconViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
     public static final int inRangeColor = Color.rgb(171, 235, 198);
     public static final int notInRangeColor = Color.rgb(230, 176, 170);
 
+    private RecyclerViewClickListener itemListener;
     private TextView namespaceId;
     private TextView instanceId;
     private TextView distance;
@@ -20,13 +21,15 @@ public class BeaconViewHolder extends RecyclerView.ViewHolder {
     private TextView macAddress;
 
 
-    public BeaconViewHolder(@NonNull View itemView) {
+    public BeaconViewHolder(@NonNull View itemView, RecyclerViewClickListener itemListener) {
         super(itemView);
+        this.itemListener = itemListener;
         namespaceId = (TextView) itemView.findViewById(R.id.b_namespace_id);
         instanceId = (TextView) itemView.findViewById(R.id.b_instance_id);
         distance = (TextView) itemView.findViewById(R.id.b_distance);
         rssi = (TextView) itemView.findViewById(R.id.b_rssi);
         macAddress = (TextView) itemView.findViewById(R.id.b_mac_address);
+        itemView.setOnClickListener(this);
     }
 
     public void bindData(final BeaconInfo viewModel) {
@@ -36,5 +39,10 @@ public class BeaconViewHolder extends RecyclerView.ViewHolder {
         rssi.setText("RSSI: " + String.valueOf(viewModel.getRssi()));
         macAddress.setText("MAC: " + viewModel.getMacAddress());
         itemView.setBackgroundColor(viewModel.isInRange() ? inRangeColor : notInRangeColor);
+    }
+
+    @Override
+    public void onClick(View v) {
+        itemListener.recyclerViewListClicked(v, this.getLayoutPosition());
     }
 }

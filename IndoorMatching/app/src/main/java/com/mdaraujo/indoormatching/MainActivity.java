@@ -20,6 +20,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.facebook.login.LoginManager;
@@ -36,9 +37,10 @@ import org.altbeacon.beacon.service.ArmaRssiFilter;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements BeaconConsumer, RangeNotifier {
+public class MainActivity extends AppCompatActivity implements BeaconConsumer, RangeNotifier, RecyclerViewClickListener {
 
     private static String TAG = "MainActivity";
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
@@ -75,8 +77,9 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
 
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.beacons_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
         beaconsInfo = new ArrayList<>();
-        beaconsAdapter = new BeaconsAdapter(beaconsInfo);
+        beaconsAdapter = new BeaconsAdapter(beaconsInfo, this);
         recyclerView.setAdapter(beaconsAdapter);
 
         btnStartScan = findViewById(R.id.btn_start_scan);
@@ -144,7 +147,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
             if (foundBeacon.getServiceUuid() == 0xfeaa && foundBeacon.getBeaconTypeCode() == 0x00) {
                 // This is a Eddystone-UID frame
 
-                BeaconInfo beaconInfo = getBeaconFromList(foundBeacon);
+                BeaconInfo beaconInfo = getBeaconFromList(foundBeacon.getBluetoothAddress());
 
                 if (beaconInfo == null) {
                     beaconsInfo.add(new BeaconInfo(foundBeacon.getId1().toHexString(),
@@ -157,14 +160,19 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
                 }
             }
         }
-        Log.i(TAG, "FOUND: " + foundBeacons.size());
-
+        Collections.sort(beaconsInfo, (o1, o2) -> o1.getMacAddress().compareTo(o2.getMacAddress()));
         beaconsAdapter.notifyDataSetChanged();
     }
 
-    private BeaconInfo getBeaconFromList(Beacon foundBeacon) {
+    @Override
+    public void recyclerViewListClicked(View v, int position) {
+        BeaconInfo beacon = beaconsInfo.get(position);
+        Toast.makeText(v.getContext(), beacon.getMacAddress(), Toast.LENGTH_SHORT).show();
+    }
+
+    private BeaconInfo getBeaconFromList(String macAddress) {
         for (BeaconInfo beacon : beaconsInfo) {
-            if (beacon.getMacAddress().equals(foundBeacon.getBluetoothAddress()))
+            if (beacon.getMacAddress().equals(macAddress))
                 return beacon;
         }
         return null;
@@ -257,4 +265,5 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
 
         }
     }
+
 }

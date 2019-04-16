@@ -10,27 +10,30 @@ import java.util.List;
 
 public class BeaconsAdapter extends RecyclerView.Adapter {
 
-    private List<BeaconInfo> models;
+    private List<BeaconInfo> beacons;
+    private RecyclerViewClickListener itemListener;
 
-    public BeaconsAdapter(List<BeaconInfo> models) {
-        this.models = models;
+
+    public BeaconsAdapter(List<BeaconInfo> models, RecyclerViewClickListener itemListener) {
+        this.beacons = models;
+        this.itemListener = itemListener;
     }
 
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, final int viewType) {
         final View view = LayoutInflater.from(parent.getContext()).inflate(viewType, parent, false);
-        return new BeaconViewHolder(view);
+        return new BeaconViewHolder(view, itemListener);
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, final int position) {
-        ((BeaconViewHolder) holder).bindData(models.get(position));
+        ((BeaconViewHolder) holder).bindData(beacons.get(position));
     }
 
     @Override
     public int getItemCount() {
-        return models.size();
+        return beacons.size();
     }
 
     @Override
