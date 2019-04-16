@@ -10,7 +10,8 @@ import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.method.ScrollingMovementMethod;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -29,16 +30,13 @@ import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
 import org.altbeacon.beacon.BeaconManager;
 import org.altbeacon.beacon.BeaconParser;
-import org.altbeacon.beacon.Identifier;
 import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
 import org.altbeacon.beacon.service.ArmaRssiFilter;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements BeaconConsumer, RangeNotifier {
 
@@ -46,8 +44,11 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
 
     private BeaconManager mBeaconManager;
-    private TextView resultsTextView;
     private Button btnStartScan;
+
+    private List<BeaconInfo> beaconsInfo;
+    private BeaconsAdapter beaconsAdapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,8 +73,11 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
 
         BeaconManager.setRssiFilterImplClass(ArmaRssiFilter.class);
 
-        resultsTextView = findViewById(R.id.resultsTextView);
-        resultsTextView.setMovementMethod(new ScrollingMovementMethod());
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.beacons_recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        beaconsInfo = new ArrayList<>();
+        beaconsAdapter = new BeaconsAdapter(beaconsInfo);
+        recyclerView.setAdapter(beaconsAdapter);
 
         btnStartScan = findViewById(R.id.btn_start_scan);
 
@@ -125,40 +129,45 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
     }
 
     @Override
-    public void didRangeBeaconsInRegion(Collection<Beacon> beaconsCollection, Region region) {
-        String nBeaconsText = String.format(Locale.US,
-                "--------------------\nNumber of beacons: %d\n",
-                beaconsCollection.size());
+    public void didRangeBeaconsInRegion(Collection<Beacon> foundBeacons, Region region) {
 
-        Log.i(TAG, nBeaconsText);
-        logToDisplay(nBeaconsText);
+        for (BeaconInfo beacon : beaconsInfo) {
+            beacon.setInRange(false);
+        }
 
-        if (beaconsCollection.size() <= 0) {
+        if (foundBeacons.size() <= 0) {
+            beaconsAdapter.notifyDataSetChanged();
             return;
         }
 
-        List<Beacon> beacons = new ArrayList<>(beaconsCollection);
-
-        Collections.sort(beacons, (o1, o2) -> Double.compare(o1.getDistance(), o2.getDistance()));
-
-        for (Beacon beacon : beacons) {
-            if (beacon.getServiceUuid() == 0xfeaa && beacon.getBeaconTypeCode() == 0x00) {
+        for (Beacon foundBeacon : foundBeacons) {
+            if (foundBeacon.getServiceUuid() == 0xfeaa && foundBeacon.getBeaconTypeCode() == 0x00) {
                 // This is a Eddystone-UID frame
-                Identifier namespaceId = beacon.getId1();
-                Identifier instanceId = beacon.getId2();
 
-                String beaconText = String.format(Locale.US,
-                        "Namespace id: %s\nInstance id: %s\nDistance: %f\n",
-                        namespaceId, instanceId, beacon.getDistance());
+                BeaconInfo beaconInfo = getBeaconFromList(foundBeacon);
 
-                Log.i(TAG, beaconText);
-                logToDisplay(beaconText);
+                if (beaconInfo == null) {
+                    beaconsInfo.add(new BeaconInfo(foundBeacon.getId1().toHexString(),
+                            foundBeacon.getId2().toHexString(), foundBeacon.getBluetoothAddress(),
+                            foundBeacon.getRssi(), foundBeacon.getDistance(), true));
+                } else {
+                    beaconInfo.setDistance(foundBeacon.getDistance());
+                    beaconInfo.setRssi(foundBeacon.getRssi());
+                    beaconInfo.setInRange(true);
+                }
             }
         }
+        Log.i(TAG, "FOUND: " + foundBeacons.size());
+
+        beaconsAdapter.notifyDataSetChanged();
     }
 
-    private void logToDisplay(final String text) {
-        runOnUiThread(() -> resultsTextView.append(text + "\n"));
+    private BeaconInfo getBeaconFromList(Beacon foundBeacon) {
+        for (BeaconInfo beacon : beaconsInfo) {
+            if (beacon.getMacAddress().equals(foundBeacon.getBluetoothAddress()))
+                return beacon;
+        }
+        return null;
     }
 
     @Override

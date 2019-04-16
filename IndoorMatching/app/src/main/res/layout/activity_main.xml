@@ -38,16 +38,13 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/resultsTextView"
-        android:layout_width="wrap_content"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/beacons_recycler_view"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:gravity="bottom"
-        android:maxLines="25"
-        android:scrollbars="vertical"
+        android:layout_marginTop="12dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_start_scan" />
+        app:layout_constraintTop_toBottomOf="@+id/user_photo" />
 
 </android.support.constraint.ConstraintLayout>
