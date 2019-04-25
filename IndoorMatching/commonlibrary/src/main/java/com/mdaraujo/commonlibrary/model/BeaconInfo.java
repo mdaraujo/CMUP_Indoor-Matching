@@ -4,6 +4,8 @@ import com.google.firebase.firestore.Exclude;
 
 public class BeaconInfo {
 
+    public static final String BEACONS_COLLECTION_NAME = "beacons";
+
     private String namespaceId;
     private String instanceId;
     private String macAddress;

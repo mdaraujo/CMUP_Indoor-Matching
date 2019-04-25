@@ -2,6 +2,8 @@ package com.mdaraujo.commonlibrary.model;
 
 public class Room {
 
+    public static final String ROOMS_COLLECTION_NAME = "rooms";
+
     private String name;
     private String serverURL;
     private float width;

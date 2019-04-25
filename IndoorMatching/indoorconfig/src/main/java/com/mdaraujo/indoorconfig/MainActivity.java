@@ -49,13 +49,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import static com.mdaraujo.commonlibrary.CommonParams.PERMISSION_REQUEST_COARSE_LOCATION;
+import static com.mdaraujo.commonlibrary.model.BeaconInfo.BEACONS_COLLECTION_NAME;
+import static com.mdaraujo.commonlibrary.model.Room.ROOMS_COLLECTION_NAME;
+
 public class MainActivity extends AppCompatActivity implements BeaconConsumer, RangeNotifier, RecyclerViewClickListener {
 
     private static String TAG = "MainActivity";
-    private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
-
-    private static final String BEACONS_COLLECTION_NAME = "beacons";
-    private static final String ROOMS_COLLECTION_NAME = "rooms";
 
     private BeaconManager mBeaconManager;
 
