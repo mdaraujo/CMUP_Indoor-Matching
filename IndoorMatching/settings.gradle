@@ -1,1 +1,1 @@
-include ':app', ':indoorconfig'
+include ':app', ':indoorconfig', ':commonlibrary'

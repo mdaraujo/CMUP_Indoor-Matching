@@ -1,4 +1,4 @@
-package com.mdaraujo.indoorconfig;
+package com.mdaraujo.commonlibrary.model;
 
 import com.google.firebase.firestore.Exclude;
 

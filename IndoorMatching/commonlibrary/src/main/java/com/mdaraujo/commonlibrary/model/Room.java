@@ -1,4 +1,4 @@
-package com.mdaraujo.indoormatching;
+package com.mdaraujo.commonlibrary.model;
 
 public class Room {
 
