@@ -10,8 +10,6 @@ import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -20,14 +18,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.facebook.login.LoginManager;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -53,20 +49,17 @@ import static com.mdaraujo.commonlibrary.CommonParams.PERMISSION_REQUEST_COARSE_
 import static com.mdaraujo.commonlibrary.model.BeaconInfo.BEACONS_COLLECTION_NAME;
 import static com.mdaraujo.commonlibrary.model.Room.ROOMS_COLLECTION_NAME;
 
-public class MainActivity extends AppCompatActivity implements BeaconConsumer, RangeNotifier, RecyclerViewClickListener {
+public class MainActivity extends AppCompatActivity implements BeaconConsumer, RangeNotifier {
 
     private static String TAG = "MainActivity";
 
     private BeaconManager mBeaconManager;
-
     private FirebaseFirestore firestoreDb;
     private Room room;
     private List<BeaconInfo> beaconsInfo;
-    private BeaconsAdapter beaconsAdapter;
 
     private Button scanBtn;
     private TextView roomNameView;
-    private Button roomAddBtn;
 
 
     @Override
@@ -94,18 +87,11 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
 
         BeaconManager.setRssiFilterImplClass(ArmaRssiFilter.class);
 
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.beacons_recycler_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setNestedScrollingEnabled(false);
-
         room = null;
         beaconsInfo = new ArrayList<>();
-        beaconsAdapter = new BeaconsAdapter(beaconsInfo, this);
-        recyclerView.setAdapter(beaconsAdapter);
 
         scanBtn = findViewById(R.id.scan_btn);
         roomNameView = findViewById(R.id.room_name_text);
-        roomAddBtn = findViewById(R.id.room_add_btn);
 
         verifyBluetooth();
 
@@ -162,7 +148,6 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
         }
 
         if (foundBeacons.size() <= 0) {
-            beaconsAdapter.notifyDataSetChanged();
             return;
         }
 
@@ -188,13 +173,6 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
             }
         }
         Collections.sort(beaconsInfo, (o1, o2) -> o1.getInstanceId().compareTo(o2.getInstanceId()));
-        beaconsAdapter.notifyDataSetChanged();
-    }
-
-    @Override
-    public void recyclerViewListClicked(View v, int position) {
-        BeaconInfo beacon = beaconsInfo.get(position);
-        Toast.makeText(v.getContext(), beacon.getInstanceId(), Toast.LENGTH_SHORT).show();
     }
 
     private BeaconInfo getBeaconFromList(String instanceId) {
@@ -272,8 +250,6 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
                                         Log.i(TAG, "Room: " + room.getName());
 
                                         roomNameView.setText(room.getName());
-                                        roomAddBtn.setVisibility(View.GONE);
-
                                         getBeaconsOfRoom(beaconInfo.getRoomKey());
                                     }
                                 }
@@ -342,25 +318,6 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
                 }
             }
         }
-    }
-
-    public void addNewRoomBtnClick(View view) {
-
-        DocumentReference roomRef = firestoreDb.collection(ROOMS_COLLECTION_NAME).document();
-
-        Room room = new Room("The first bar", "http://192.168.24.1/mqtt",
-                50, 20);
-
-        roomRef.set(room);
-
-        // Get a reference to the restaurants collection
-        CollectionReference beacons = firestoreDb.collection(BEACONS_COLLECTION_NAME);
-
-        for (BeaconInfo beaconInfo : beaconsInfo) {
-            beaconInfo.setRoomKey(roomRef.getId());
-            beacons.add(beaconInfo);
-        }
-
     }
 
     public void scanBtnClick(View view) {
