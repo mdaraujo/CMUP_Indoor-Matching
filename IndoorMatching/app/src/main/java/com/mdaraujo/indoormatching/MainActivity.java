@@ -24,8 +24,15 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.facebook.login.LoginManager;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
@@ -45,11 +52,19 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
     private static String TAG = "MainActivity";
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
 
-    private BeaconManager mBeaconManager;
-    private Button btnStartScan;
+    private static final String BEACONS_COLLECTION_NAME = "beacons";
+    private static final String ROOMS_COLLECTION_NAME = "rooms";
 
+    private BeaconManager mBeaconManager;
+
+    private FirebaseFirestore firestoreDb;
+    private Room room;
     private List<BeaconInfo> beaconsInfo;
     private BeaconsAdapter beaconsAdapter;
+
+    private Button scanBtn;
+    private TextView roomNameView;
+    private Button roomAddBtn;
 
 
     @Override
@@ -59,7 +74,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
-            TextView displayName = findViewById(R.id.user_name);
+            TextView displayName = findViewById(R.id.user_name_text);
             ImageView displayImage = findViewById(R.id.user_photo);
             String name = user.getDisplayName();
             Uri photoUrl = user.getPhotoUrl();
@@ -70,6 +85,8 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
             finish();
         }
 
+        firestoreDb = FirebaseFirestore.getInstance();
+
 //        BeaconManager.setRssiFilterImplClass(RunningAverageRssiFilter.class);
 //        RunningAverageRssiFilter.setSampleExpirationMilliseconds(5000l);
 
@@ -77,12 +94,16 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
 
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.beacons_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setNestedScrollingEnabled(false);
 
+        room = null;
         beaconsInfo = new ArrayList<>();
         beaconsAdapter = new BeaconsAdapter(beaconsInfo, this);
         recyclerView.setAdapter(beaconsAdapter);
 
-        btnStartScan = findViewById(R.id.btn_start_scan);
+        scanBtn = findViewById(R.id.scan_btn);
+        roomNameView = findViewById(R.id.room_name_text);
+        roomAddBtn = findViewById(R.id.room_add_btn);
 
         verifyBluetooth();
 
@@ -118,7 +139,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
         mBeaconManager.setForegroundBetweenScanPeriod(1200L);
 
         mBeaconManager.bind(this);
-        btnStartScan.setText(R.string.stop);
+        scanBtn.setText(R.string.stop);
     }
 
     public void onBeaconServiceConnect() {
@@ -147,12 +168,16 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
             if (foundBeacon.getServiceUuid() == 0xfeaa && foundBeacon.getBeaconTypeCode() == 0x00) {
                 // This is a Eddystone-UID frame
 
-                BeaconInfo beaconInfo = getBeaconFromList(foundBeacon.getBluetoothAddress());
+                BeaconInfo beaconInfo = getBeaconFromList(foundBeacon.getId2().toHexString());
 
                 if (beaconInfo == null) {
-                    beaconsInfo.add(new BeaconInfo(foundBeacon.getId1().toHexString(),
-                            foundBeacon.getId2().toHexString(), foundBeacon.getBluetoothAddress(),
-                            foundBeacon.getRssi(), foundBeacon.getDistance(), true));
+
+                    if (room == null) {
+                        getRoomOfBeacon(foundBeacon);
+                    } else {
+                        addFoundBeaconToList(foundBeacon);
+                    }
+
                 } else {
                     beaconInfo.setDistance(foundBeacon.getDistance());
                     beaconInfo.setRssi(foundBeacon.getRssi());
@@ -160,22 +185,108 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
                 }
             }
         }
-        Collections.sort(beaconsInfo, (o1, o2) -> o1.getMacAddress().compareTo(o2.getMacAddress()));
+        Collections.sort(beaconsInfo, (o1, o2) -> o1.getInstanceId().compareTo(o2.getInstanceId()));
         beaconsAdapter.notifyDataSetChanged();
     }
 
     @Override
     public void recyclerViewListClicked(View v, int position) {
         BeaconInfo beacon = beaconsInfo.get(position);
-        Toast.makeText(v.getContext(), beacon.getMacAddress(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(v.getContext(), beacon.getInstanceId(), Toast.LENGTH_SHORT).show();
     }
 
-    private BeaconInfo getBeaconFromList(String macAddress) {
+    private BeaconInfo getBeaconFromList(String instanceId) {
         for (BeaconInfo beacon : beaconsInfo) {
-            if (beacon.getMacAddress().equals(macAddress))
+            if (beacon.getInstanceId().equals(instanceId))
                 return beacon;
         }
         return null;
+    }
+
+    private void addFoundBeaconToList(Beacon foundBeacon) {
+        beaconsInfo.add(new BeaconInfo(foundBeacon.getId1().toHexString(),
+                foundBeacon.getId2().toHexString(), foundBeacon.getBluetoothAddress(),
+                foundBeacon.getRssi(), foundBeacon.getDistance(), true));
+    }
+
+    private void getBeaconsOfRoom(String roomKey) {
+        Query queryBeacons = firestoreDb.collection(BEACONS_COLLECTION_NAME)
+                .whereEqualTo("roomKey", roomKey);
+
+        queryBeacons.get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot documentSnapshots) {
+
+                        if (!documentSnapshots.isEmpty()) {
+
+                            for (DocumentSnapshot beaconSnapshot : documentSnapshots.getDocuments()) {
+                                BeaconInfo retrievedBeacon = beaconSnapshot.toObject(BeaconInfo.class);
+
+                                BeaconInfo beaconFound = getBeaconFromList(retrievedBeacon.getInstanceId());
+
+                                if (beaconFound != null) {
+                                    beaconFound.setRoomKey(roomKey);
+                                    Log.i(TAG, "getBeaconsOfRoom: beaconFound.setRoomKey(roomKey) " + beaconFound.getInstanceId());
+                                } else {
+                                    beaconsInfo.add(retrievedBeacon);
+                                    Log.i(TAG, "getBeaconsOfRoom: beaconsInfo.add() " + retrievedBeacon.getInstanceId());
+                                }
+                            }
+                        } else {
+                            Log.i(TAG, "Zero beacons associated with room " + roomKey);
+                        }
+                    }
+                });
+    }
+
+    private void getRoomOfBeacon(Beacon foundBeacon) {
+        String instanceId = foundBeacon.getId2().toHexString();
+
+        Query queryBeacon = firestoreDb.collection(BEACONS_COLLECTION_NAME)
+                .whereEqualTo("instanceId", instanceId)
+                .limit(1);
+
+        queryBeacon.get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot beaconsSnapshots) {
+
+                        if (!beaconsSnapshots.isEmpty()) {
+                            DocumentSnapshot beaconDocument = beaconsSnapshots.getDocuments().get(0);
+                            Log.i(TAG, "Beacon data: " + beaconDocument.getData());
+                            BeaconInfo beaconInfo = beaconDocument.toObject(BeaconInfo.class);
+
+                            Log.i(TAG, "Beacon getRoomKey: " + beaconInfo.getRoomKey());
+
+                            DocumentReference docRef = firestoreDb.collection(ROOMS_COLLECTION_NAME)
+                                    .document(beaconInfo.getRoomKey());
+
+                            docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                @Override
+                                public void onSuccess(DocumentSnapshot roomSnapshot) {
+                                    if (roomSnapshot.exists() && room == null) {
+                                        room = roomSnapshot.toObject(Room.class);
+                                        Log.i(TAG, "Room: " + room.getName());
+
+                                        roomNameView.setText(room.getName());
+                                        roomAddBtn.setVisibility(View.GONE);
+
+                                        getBeaconsOfRoom(beaconInfo.getRoomKey());
+                                    }
+                                }
+                            });
+
+                        } else {
+                            Log.i(TAG, "Beacon not found.");
+                            BeaconInfo beaconInfo = getBeaconFromList(foundBeacon.getId2().toHexString());
+
+                            if (beaconInfo == null) {
+                                addFoundBeaconToList(foundBeacon);
+                            }
+                        }
+                    }
+                });
     }
 
     @Override
@@ -231,13 +342,32 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
         }
     }
 
-    public void startMonitoring(View view) {
+    public void addNewRoomBtnClick(View view) {
+
+        DocumentReference roomRef = firestoreDb.collection(ROOMS_COLLECTION_NAME).document();
+
+        Room room = new Room("The first bar", "http://192.168.24.1/mqtt",
+                50, 20);
+
+        roomRef.set(room);
+
+        // Get a reference to the restaurants collection
+        CollectionReference beacons = firestoreDb.collection(BEACONS_COLLECTION_NAME);
+
+        for (BeaconInfo beaconInfo : beaconsInfo) {
+            beaconInfo.setRoomKey(roomRef.getId());
+            beacons.add(beaconInfo);
+        }
+
+    }
+
+    public void scanBtnClick(View view) {
         if (mBeaconManager.isBound(this)) {
             mBeaconManager.unbind(this);
-            btnStartScan.setText(R.string.start);
+            scanBtn.setText(R.string.start);
         } else {
             mBeaconManager.bind(this);
-            btnStartScan.setText(R.string.stop);
+            scanBtn.setText(R.string.stop);
         }
     }
 

@@ -19,6 +19,7 @@ public class BeaconViewHolder extends RecyclerView.ViewHolder implements View.On
     private TextView distance;
     private TextView rssi;
     private TextView macAddress;
+    private TextView coordinates;
 
 
     public BeaconViewHolder(@NonNull View itemView, RecyclerViewClickListener itemListener) {
@@ -29,6 +30,7 @@ public class BeaconViewHolder extends RecyclerView.ViewHolder implements View.On
         distance = (TextView) itemView.findViewById(R.id.b_distance);
         rssi = (TextView) itemView.findViewById(R.id.b_rssi);
         macAddress = (TextView) itemView.findViewById(R.id.b_mac_address);
+        coordinates = (TextView) itemView.findViewById(R.id.b_coordinates);
         itemView.setOnClickListener(this);
     }
 
@@ -38,6 +40,7 @@ public class BeaconViewHolder extends RecyclerView.ViewHolder implements View.On
         distance.setText(String.format(Locale.US, "Distance: %5.2f meters", viewModel.getDistance()));
         rssi.setText("RSSI: " + String.valueOf(viewModel.getRssi()));
         macAddress.setText("MAC: " + viewModel.getMacAddress());
+        coordinates.setText(viewModel.getRoomKey() != null ? "X: " + viewModel.getPosX() + " Y: " + viewModel.getPosY() : "Configure ->");
         itemView.setBackgroundColor(viewModel.isInRange() ? inRangeColor : notInRangeColor);
     }
 
