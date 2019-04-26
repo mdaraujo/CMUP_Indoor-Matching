@@ -63,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
     private String roomKey;
     private List<BeaconInfo> beaconsInfo;
     private BeaconsAdapter beaconsAdapter;
+    private RecyclerView recyclerView;
 
     private Button scanBtn;
     private TextView roomNameView;
@@ -94,14 +95,9 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
 
         BeaconManager.setRssiFilterImplClass(ArmaRssiFilter.class);
 
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.beacons_recycler_view);
+        recyclerView = (RecyclerView) findViewById(R.id.beacons_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setNestedScrollingEnabled(false);
-
-        room = null;
-        beaconsInfo = new ArrayList<>();
-        beaconsAdapter = new BeaconsAdapter(beaconsInfo, this);
-        recyclerView.setAdapter(beaconsAdapter);
 
         scanBtn = findViewById(R.id.scan_btn);
         roomNameView = findViewById(R.id.room_name_text);
@@ -128,6 +124,12 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
     @Override
     public void onResume() {
         super.onResume();
+
+        room = null;
+        beaconsInfo = new ArrayList<>();
+        beaconsAdapter = new BeaconsAdapter(beaconsInfo, this);
+        recyclerView.setAdapter(beaconsAdapter);
+
         mBeaconManager = BeaconManager.getInstanceForApplication(this.getApplicationContext());
         mBeaconManager.getBeaconParsers().add(new BeaconParser().
                 setBeaconLayout(BeaconParser.EDDYSTONE_UID_LAYOUT));
@@ -202,8 +204,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
         Intent beaconConfigIntent = new Intent(this, BeaconConfigActivity.class);
         beaconConfigIntent.putExtra("BeaconInfo", beacon);
 
-
-        this.startActivity(beaconConfigIntent);
+        startActivity(beaconConfigIntent);
     }
 
     private BeaconInfo getBeaconFromList(String instanceId) {
@@ -238,6 +239,8 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
 
                                 if (beaconFound != null) {
                                     beaconFound.setRoomKey(roomKey);
+                                    beaconFound.setPosX(retrievedBeacon.getPosX());
+                                    beaconFound.setPosY(retrievedBeacon.getPosY());
                                     Log.i(TAG, "getBeaconsOfRoom: beaconFound.setRoomKey(roomKey) " + beaconFound.getInstanceId());
                                 } else {
                                     beaconsInfo.add(retrievedBeacon);
