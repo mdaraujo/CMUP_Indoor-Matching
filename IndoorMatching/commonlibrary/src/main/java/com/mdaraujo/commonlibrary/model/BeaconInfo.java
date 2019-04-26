@@ -2,7 +2,11 @@ package com.mdaraujo.commonlibrary.model;
 
 import com.google.firebase.firestore.Exclude;
 
-public class BeaconInfo {
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
+
+public class BeaconInfo implements Serializable {
 
     public static final String BEACONS_COLLECTION_NAME = "beacons";
 
@@ -29,6 +33,18 @@ public class BeaconInfo {
         this.posX = -1;
         this.posY = -1;
         this.roomKey = null;
+    }
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("namespaceId", namespaceId);
+        map.put("instanceId", instanceId);
+        map.put("macAddress", macAddress);
+        map.put("posX", posX);
+        map.put("posY", posY);
+        map.put("roomKey", roomKey);
+
+        return map;
     }
 
     public String getNamespaceId() {

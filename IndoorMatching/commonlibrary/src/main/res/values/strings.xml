@@ -5,4 +5,13 @@
     <string name="start">Start</string>
     <string name="stop">Stop</string>
     <string name="room_not_found">Room not found!</string>
+    <string name="beacon_namespace">Namespace</string>
+    <string name="beacon_instance_id">Instance ID</string>
+    <string name="beacon_mac">MAC</string>
+    <string name="beacon_position_x">X:</string>
+    <string name="beacon_position_y">Y:</string>
+    <string name="beacon_position">Position</string>
+    <string name="beacon_default_position_value">-1</string>
+    <string name="position_hint">Coordinate Value</string>
+    <string name="delete">Delete</string>
 </resources>

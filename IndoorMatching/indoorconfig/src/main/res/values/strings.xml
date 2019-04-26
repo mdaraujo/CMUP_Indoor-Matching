@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">IndoorConfig</string>
+    <string name="title_activity_beacon_config">Beacon Configuration</string>
 </resources>

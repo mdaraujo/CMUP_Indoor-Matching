@@ -27,7 +27,6 @@ import com.facebook.login.LoginManager;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -61,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
 
     private FirebaseFirestore firestoreDb;
     private Room room;
+    private String roomKey;
     private List<BeaconInfo> beaconsInfo;
     private BeaconsAdapter beaconsAdapter;
 
@@ -195,6 +195,15 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
     public void recyclerViewListClicked(View v, int position) {
         BeaconInfo beacon = beaconsInfo.get(position);
         Toast.makeText(v.getContext(), beacon.getInstanceId(), Toast.LENGTH_SHORT).show();
+
+        if (room == null) return;
+
+        beacon.setRoomKey(roomKey);
+        Intent beaconConfigIntent = new Intent(this, BeaconConfigActivity.class);
+        beaconConfigIntent.putExtra("BeaconInfo", beacon);
+
+
+        this.startActivity(beaconConfigIntent);
     }
 
     private BeaconInfo getBeaconFromList(String instanceId) {
@@ -273,6 +282,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
 
                                         roomNameView.setText(room.getName());
                                         roomAddBtn.setVisibility(View.GONE);
+                                        roomKey = beaconInfo.getRoomKey();
 
                                         getBeaconsOfRoom(beaconInfo.getRoomKey());
                                     }
@@ -346,21 +356,18 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
 
     public void addNewRoomBtnClick(View view) {
 
+        String barName = "The First Bar";
+        String serverURL = "http://192.168.24.1/mqtt";
+        int width = 50;
+        int height = 20;
+
         DocumentReference roomRef = firestoreDb.collection(ROOMS_COLLECTION_NAME).document();
-
-        Room room = new Room("The first bar", "http://192.168.24.1/mqtt",
-                50, 20);
-
+        Room room = new Room(barName, serverURL, width, height);
         roomRef.set(room);
+        roomKey = roomRef.getId();
 
-        // Get a reference to the restaurants collection
-        CollectionReference beacons = firestoreDb.collection(BEACONS_COLLECTION_NAME);
-
-        for (BeaconInfo beaconInfo : beaconsInfo) {
-            beaconInfo.setRoomKey(roomRef.getId());
-            beacons.add(beaconInfo);
-        }
-
+        roomNameView.setText(room.getName());
+        roomAddBtn.setVisibility(View.GONE);
     }
 
     public void scanBtnClick(View view) {
