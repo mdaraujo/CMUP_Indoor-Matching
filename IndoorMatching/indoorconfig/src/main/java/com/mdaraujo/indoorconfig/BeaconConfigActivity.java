@@ -10,6 +10,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
@@ -67,7 +68,8 @@ public class BeaconConfigActivity extends AppCompatActivity {
 
                 Snackbar.make(view, "Saved beacon [ID=" + beacon.getMacAddress() + "] configurations.", Snackbar.LENGTH_LONG);
                 DocumentReference beaconRef = firestoreDb.collection(BEACONS_COLLECTION_NAME).document(beacon.getMacAddress());
-                beaconRef.update(beacon.toMap())
+
+                beaconRef.set(beacon.toMap())                                                       //set() instead of update() to create if document does not exist
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
@@ -92,6 +94,32 @@ public class BeaconConfigActivity extends AppCompatActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.beaconconfigmenu, menu);
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_delete:
+                Log.i(TAG, "Delete beacon");
+                DocumentReference beaconRef = firestoreDb.collection(BEACONS_COLLECTION_NAME).document(beacon.getMacAddress());
+                beaconRef.delete()
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Log.d(TAG, "Beacon successfully deleted!");
+                                finish();
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.w(TAG, "Error deleting beacon", e);
+                            }
+                        });
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
 }
