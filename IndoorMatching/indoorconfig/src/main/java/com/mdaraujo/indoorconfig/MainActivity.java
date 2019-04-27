@@ -390,7 +390,10 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
 
                 if (room != null) {
                     Log.i(TAG, "Room: " + room.getName() + " RoomKey: " + roomKey);
-//                    roomNameView.setText(room.getName());
+                    roomNameView.setText(room.getName());
+                    roomAddBtn.setVisibility(View.GONE);
+                    roomEditBtn.setVisibility(View.VISIBLE);
+
                 }
             }
         }
