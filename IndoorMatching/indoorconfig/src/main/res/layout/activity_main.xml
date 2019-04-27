@@ -69,8 +69,20 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
         android:onClick="addNewRoomBtnClick"
-        android:text="Add New Room"
+        android:text="@string/room_new"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/scan_btn" />
+
+    <Button
+        android:id="@+id/room_edit_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:onClick="editRoomBtnClick"
+        android:text="@string/room_edit"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="@+id/room_add_btn"
         app:layout_constraintTop_toBottomOf="@+id/scan_btn" />
 
 </android.support.constraint.ConstraintLayout>

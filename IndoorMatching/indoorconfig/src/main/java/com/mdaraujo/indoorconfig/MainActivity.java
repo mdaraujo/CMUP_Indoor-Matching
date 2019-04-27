@@ -68,6 +68,9 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
     private Button scanBtn;
     private TextView roomNameView;
     private Button roomAddBtn;
+    private Button roomEditBtn;
+
+    public static final int ROOM_REQUEST_CODE = 1;
 
 
     @Override
@@ -102,6 +105,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
         scanBtn = findViewById(R.id.scan_btn);
         roomNameView = findViewById(R.id.room_name_text);
         roomAddBtn = findViewById(R.id.room_add_btn);
+        roomEditBtn = findViewById(R.id.room_edit_btn);
 
         verifyBluetooth();
 
@@ -198,7 +202,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
         BeaconInfo beacon = beaconsInfo.get(position);
         Toast.makeText(v.getContext(), beacon.getInstanceId(), Toast.LENGTH_SHORT).show();
 
-        if (room == null) return;
+        if (room == null && roomKey == null) return;
 
         beacon.setRoomKey(roomKey);
         Intent beaconConfigIntent = new Intent(this, BeaconConfigActivity.class);
@@ -285,6 +289,8 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
 
                                         roomNameView.setText(room.getName());
                                         roomAddBtn.setVisibility(View.GONE);
+                                        roomEditBtn.setVisibility(View.VISIBLE);
+
                                         roomKey = beaconInfo.getRoomKey();
 
                                         getBeaconsOfRoom(beaconInfo.getRoomKey());
@@ -358,20 +364,38 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
     }
 
     public void addNewRoomBtnClick(View view) {
-
-        String barName = "The First Bar";
-        String serverURL = "http://192.168.24.1/mqtt";
-        int width = 50;
-        int height = 20;
-
         DocumentReference roomRef = firestoreDb.collection(ROOMS_COLLECTION_NAME).document();
-        Room room = new Room(barName, serverURL, width, height);
-        roomRef.set(room);
         roomKey = roomRef.getId();
 
-        roomNameView.setText(room.getName());
-        roomAddBtn.setVisibility(View.GONE);
+        Intent roomConfigIntent = new Intent(this, RoomConfigActivity.class);
+        roomConfigIntent.putExtra("roomKey", roomKey);
+
+        startActivityForResult(roomConfigIntent, ROOM_REQUEST_CODE);
     }
+
+    public void editRoomBtnClick(View view) {
+        DocumentReference roomRef = firestoreDb.collection(ROOMS_COLLECTION_NAME).document(roomKey);
+
+        Intent roomConfigIntent = new Intent(this, RoomConfigActivity.class);
+        roomConfigIntent.putExtra("roomKey", roomKey);
+
+        startActivity(roomConfigIntent);
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == ROOM_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                room = (Room) data.getSerializableExtra("room");
+                roomKey = data.getStringExtra("roomKey");
+
+                if (room != null) {
+                    Log.i(TAG, "Room: " + room.getName() + " RoomKey: " + roomKey);
+//                    roomNameView.setText(room.getName());
+                }
+            }
+        }
+    }
+
 
     public void scanBtnClick(View view) {
         if (mBeaconManager.isBound(this)) {
@@ -401,8 +425,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
                 return true;
 
             default:
-                // If we got here, the user's action was not recognized.
-                // Invoke the superclass to handle it.
+                // User action not recognized.
                 return super.onOptionsItemSelected(item);
 
         }

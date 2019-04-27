@@ -1,6 +1,8 @@
 package com.mdaraujo.commonlibrary.model;
 
-public class Room {
+import java.io.Serializable;
+
+public class Room implements Serializable {
 
     public static final String ROOMS_COLLECTION_NAME = "rooms";
 
