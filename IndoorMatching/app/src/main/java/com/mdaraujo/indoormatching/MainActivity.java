@@ -53,6 +53,8 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
 
     private static String TAG = "MainActivity";
 
+    private RoomCanvasView roomCanvas;
+
     private BeaconManager mBeaconManager;
     private FirebaseFirestore firestoreDb;
     private Room room;
@@ -92,6 +94,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
 
         scanBtn = findViewById(R.id.scan_btn);
         roomNameView = findViewById(R.id.room_name_text);
+        roomCanvas = findViewById(R.id.room_canvas);
 
         verifyBluetooth();
 
@@ -172,7 +175,8 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
                 }
             }
         }
-        Collections.sort(beaconsInfo, (o1, o2) -> o1.getInstanceId().compareTo(o2.getInstanceId()));
+
+        roomCanvas.drawBeacons(beaconsInfo);
     }
 
     private BeaconInfo getBeaconFromList(String instanceId) {
@@ -207,6 +211,8 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
 
                                 if (beaconFound != null) {
                                     beaconFound.setRoomKey(roomKey);
+                                    beaconFound.setPosX(retrievedBeacon.getPosX());
+                                    beaconFound.setPosY(retrievedBeacon.getPosY());
                                     Log.i(TAG, "getBeaconsOfRoom: beaconFound.setRoomKey(roomKey) " + beaconFound.getInstanceId());
                                 } else {
                                     beaconsInfo.add(retrievedBeacon);
@@ -249,7 +255,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
                                         room = roomSnapshot.toObject(Room.class);
                                         Log.i(TAG, "Room: " + room.getName());
 
-                                        roomNameView.setText(room.getName());
+                                        roomNameView.setText("Welcome to " + room.getName());
                                         getBeaconsOfRoom(beaconInfo.getRoomKey());
                                     }
                                 }
