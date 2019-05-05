@@ -69,7 +69,7 @@ public class BeaconConfigActivity extends AppCompatActivity {
                 Snackbar.make(view, "Saved beacon [ID=" + beacon.getMacAddress() + "] configurations.", Snackbar.LENGTH_LONG);
                 DocumentReference beaconRef = firestoreDb.collection(BEACONS_COLLECTION_NAME).document(beacon.getMacAddress());
 
-                beaconRef.set(beacon.toMap())                                                       //set() instead of update() to create if document does not exist
+                beaconRef.set(beacon.toMap())
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {

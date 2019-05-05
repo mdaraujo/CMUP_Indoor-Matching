@@ -30,8 +30,8 @@ public class BeaconInfo implements Serializable {
         this.rssi = rssi;
         this.distance = distance;
         this.inRange = inRange;
-        this.posX = -1;
-        this.posY = -1;
+        this.posX = 0;
+        this.posY = 0;
         this.roomKey = null;
     }
 

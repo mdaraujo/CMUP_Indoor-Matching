@@ -200,9 +200,12 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
     @Override
     public void recyclerViewListClicked(View v, int position) {
         BeaconInfo beacon = beaconsInfo.get(position);
-        Toast.makeText(v.getContext(), beacon.getInstanceId(), Toast.LENGTH_SHORT).show();
+//        Toast.makeText(v.getContext(), beacon.getInstanceId(), Toast.LENGTH_SHORT).show();
 
-        if (room == null && roomKey == null) return;
+        if (room == null && roomKey == null) {
+            Toast.makeText(v.getContext(), "Room not found. Please add new room.", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         beacon.setRoomKey(roomKey);
         Intent beaconConfigIntent = new Intent(this, BeaconConfigActivity.class);
