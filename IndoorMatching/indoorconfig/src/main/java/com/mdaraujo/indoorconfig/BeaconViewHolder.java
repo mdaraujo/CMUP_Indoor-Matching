@@ -1,10 +1,7 @@
 package com.mdaraujo.indoorconfig;
 
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.ShapeDrawable;
 import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
@@ -33,8 +30,7 @@ public class BeaconViewHolder extends RecyclerView.ViewHolder implements View.On
     }
 
     public void bindData(final BeaconInfo viewModel) {
-//        ShapeDrawable beaconColorShape = (ShapeDrawable) beaconColor.getBackground();
-//        beaconColorShape.getPaint().setColor(Color.parseColor("#343434"));
+        beaconColor.setColorFilter(viewModel.getColor());
         beaconName.setText("Name: " + viewModel.getName());
         coordinates.setText(viewModel.getRoomKey() != null ? "X: " + viewModel.getPosX() + " Y: " + viewModel.getPosY() : "Configure ->");
         itemView.setBackgroundColor(viewModel.isInRange() ? inRangeColor : notInRangeColor);
