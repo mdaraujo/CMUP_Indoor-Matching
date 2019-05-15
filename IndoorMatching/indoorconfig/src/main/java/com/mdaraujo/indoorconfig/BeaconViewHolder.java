@@ -1,14 +1,16 @@
 package com.mdaraujo.indoorconfig;
 
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ShapeDrawable;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.mdaraujo.commonlibrary.model.BeaconInfo;
-
-import java.util.Locale;
 
 public class BeaconViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
@@ -16,32 +18,24 @@ public class BeaconViewHolder extends RecyclerView.ViewHolder implements View.On
     public static final int notInRangeColor = Color.rgb(230, 176, 170);
 
     private RecyclerViewClickListener itemListener;
-    private TextView namespaceId;
-    private TextView instanceId;
-    private TextView distance;
-    private TextView rssi;
-    private TextView macAddress;
+    private ImageView beaconColor;
+    private TextView beaconName;
     private TextView coordinates;
 
 
     public BeaconViewHolder(@NonNull View itemView, RecyclerViewClickListener itemListener) {
         super(itemView);
         this.itemListener = itemListener;
-        namespaceId = (TextView) itemView.findViewById(R.id.b_namespace_id);
-        instanceId = (TextView) itemView.findViewById(R.id.b_instance_id);
-        distance = (TextView) itemView.findViewById(R.id.b_distance);
-        rssi = (TextView) itemView.findViewById(R.id.b_rssi);
-        macAddress = (TextView) itemView.findViewById(R.id.b_mac_address);
-        coordinates = (TextView) itemView.findViewById(R.id.b_coordinates);
+        beaconColor = (ImageView) itemView.findViewById(R.id.beacon_color);
+        beaconName = (TextView) itemView.findViewById(R.id.beacon_name);
+        coordinates = (TextView) itemView.findViewById(R.id.beacon_coords);
         itemView.setOnClickListener(this);
     }
 
     public void bindData(final BeaconInfo viewModel) {
-        namespaceId.setText("Namespace: " + viewModel.getNamespaceId());
-        instanceId.setText("Instance: " + viewModel.getInstanceId());
-        distance.setText(String.format(Locale.US, "Distance: %5.2f meters", viewModel.getDistance()));
-        rssi.setText("RSSI: " + String.valueOf(viewModel.getRssi()));
-        macAddress.setText("MAC: " + viewModel.getMacAddress());
+//        ShapeDrawable beaconColorShape = (ShapeDrawable) beaconColor.getBackground();
+//        beaconColorShape.getPaint().setColor(Color.parseColor("#343434"));
+        beaconName.setText("Name: " + viewModel.getName());
         coordinates.setText(viewModel.getRoomKey() != null ? "X: " + viewModel.getPosX() + " Y: " + viewModel.getPosY() : "Configure ->");
         itemView.setBackgroundColor(viewModel.isInRange() ? inRangeColor : notInRangeColor);
     }

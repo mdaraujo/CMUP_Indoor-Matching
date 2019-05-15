@@ -12,6 +12,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -32,6 +33,8 @@ public class BeaconConfigActivity extends AppCompatActivity {
     private TextView namespaceIdView;
     private TextView instanceIdView;
     private TextView macAddressView;
+    private EditText nameView;
+    private EditText colorView;
     private TextView posXView;
     private TextView posYView;
 
@@ -46,6 +49,8 @@ public class BeaconConfigActivity extends AppCompatActivity {
         namespaceIdView = findViewById(R.id.namespace_id_view);
         instanceIdView = findViewById(R.id.instance_id_view);
         macAddressView = findViewById(R.id.mac_view);
+        nameView = findViewById(R.id.beacon_name);
+        colorView = findViewById(R.id.beacon_color);
         posXView = findViewById(R.id.position_x_edit);
         posYView = findViewById(R.id.position_y_edit);
 
@@ -55,6 +60,8 @@ public class BeaconConfigActivity extends AppCompatActivity {
         namespaceIdView.setText(beacon.getNamespaceId());
         instanceIdView.setText(beacon.getInstanceId());
         macAddressView.setText(beacon.getMacAddress());
+        nameView.setText(beacon.getName());
+        colorView.setText(beacon.getColor());
         posXView.setText(String.valueOf(beacon.getPosX()));
         posYView.setText(String.valueOf(beacon.getPosY()));
 
@@ -63,6 +70,8 @@ public class BeaconConfigActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
+                beacon.setName(String.valueOf(nameView.getText()));
+                beacon.setColor(String.valueOf(colorView.getText()));
                 beacon.setPosX(Float.parseFloat(posXView.getText().toString()));
                 beacon.setPosY(Float.parseFloat(posYView.getText().toString()));
 
