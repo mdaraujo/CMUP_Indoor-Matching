@@ -32,8 +32,6 @@ public class RoomConfigActivity extends AppCompatActivity {
 
     private TextView roomNameView;
     private TextView roomServerURLView;
-    private TextView roomWidth;
-    private TextView roomHeight;
 
 
     @Override
@@ -46,8 +44,6 @@ public class RoomConfigActivity extends AppCompatActivity {
         firestoreDb = FirebaseFirestore.getInstance();
         roomNameView = findViewById(R.id.room_name_view);
         roomServerURLView = findViewById(R.id.room_server_url_view);
-        roomWidth = findViewById(R.id.room_width_view);
-        roomHeight = findViewById(R.id.room_height_view);
 
         Intent intent = getIntent();
         roomKey = intent.getExtras().getString("roomKey");
@@ -61,8 +57,6 @@ public class RoomConfigActivity extends AppCompatActivity {
                     if (room.exists()) {
                         roomNameView.setText(room.get("name").toString());
                         roomServerURLView.setText(room.get("serverURL").toString());
-                        roomWidth.setText(room.get("width").toString());
-                        roomHeight.setText(room.get("height").toString());
                     } else {
                         Log.d(TAG, "No such document");
                     }
@@ -78,7 +72,7 @@ public class RoomConfigActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Snackbar.make(view, "Room created", Snackbar.LENGTH_LONG);
 
-                Room room = new Room(roomNameView.getText().toString(), roomServerURLView.getText().toString(), Float.parseFloat(roomWidth.getText().toString()), Float.parseFloat(roomHeight.getText().toString()));
+                Room room = new Room(roomNameView.getText().toString(), roomServerURLView.getText().toString());
                 roomRef.set(room)
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override

@@ -8,17 +8,12 @@ public class Room implements Serializable {
 
     private String name;
     private String serverURL;
-    private float width;
-    private float height;
-
     public Room() {
     }
 
-    public Room(String name, String serverURL, float width, float height) {
+    public Room(String name, String serverURL) {
         this.name = name;
         this.serverURL = serverURL;
-        this.width = width;
-        this.height = height;
     }
 
     public String getName() {
@@ -35,22 +30,6 @@ public class Room implements Serializable {
 
     public void setServerURL(String serverURL) {
         this.serverURL = serverURL;
-    }
-
-    public float getWidth() {
-        return width;
-    }
-
-    public void setWidth(float width) {
-        this.width = width;
-    }
-
-    public float getHeight() {
-        return height;
-    }
-
-    public void setHeight(float height) {
-        this.height = height;
     }
 
 }
