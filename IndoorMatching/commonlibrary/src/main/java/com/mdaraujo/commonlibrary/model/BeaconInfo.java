@@ -13,6 +13,8 @@ public class BeaconInfo implements Serializable {
     private String namespaceId;
     private String instanceId;
     private String macAddress;
+    private String name;
+    private String color;
     private int rssi;
     private Double distance;
     private boolean inRange;
@@ -27,6 +29,22 @@ public class BeaconInfo implements Serializable {
         this.namespaceId = namespaceId;
         this.instanceId = instanceId;
         this.macAddress = macAddress;
+        this.name = instanceId;
+        this.color = "#0000ff";
+        this.rssi = rssi;
+        this.distance = distance;
+        this.inRange = inRange;
+        this.posX = 0;
+        this.posY = 0;
+        this.roomKey = null;
+    }
+
+    public BeaconInfo(String namespaceId, String instanceId, String macAddress, String name, String color, int rssi, Double distance, boolean inRange) {
+        this.namespaceId = namespaceId;
+        this.instanceId = instanceId;
+        this.macAddress = macAddress;
+        this.name = name;
+        this.color = color;
         this.rssi = rssi;
         this.distance = distance;
         this.inRange = inRange;
@@ -40,6 +58,8 @@ public class BeaconInfo implements Serializable {
         map.put("namespaceId", namespaceId);
         map.put("instanceId", instanceId);
         map.put("macAddress", macAddress);
+        map.put("name", name);
+        map.put("color", color);
         map.put("posX", posX);
         map.put("posY", posY);
         map.put("roomKey", roomKey);
@@ -69,6 +89,22 @@ public class BeaconInfo implements Serializable {
 
     public void setMacAddress(String macAddress) {
         this.macAddress = macAddress;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
     }
 
     @Exclude

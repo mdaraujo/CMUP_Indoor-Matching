@@ -19,4 +19,6 @@
     <string name="room_server_url">Server URL</string>
     <string name="room_width">Width</string>
     <string name="room_height">Height</string>
+    <string name="beacon_name">Name</string>
+    <string name="beacon_color">Color</string>
 </resources>
