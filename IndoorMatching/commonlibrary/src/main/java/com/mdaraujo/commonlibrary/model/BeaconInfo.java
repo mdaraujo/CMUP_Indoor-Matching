@@ -14,7 +14,7 @@ public class BeaconInfo implements Serializable {
     private String instanceId;
     private String macAddress;
     private String name;
-    private String color;
+    private int color;
     private int rssi;
     private Double distance;
     private boolean inRange;
@@ -30,7 +30,7 @@ public class BeaconInfo implements Serializable {
         this.instanceId = instanceId;
         this.macAddress = macAddress;
         this.name = instanceId;
-        this.color = "#0000ff";
+        this.color = 0x0000ff;
         this.rssi = rssi;
         this.distance = distance;
         this.inRange = inRange;
@@ -39,7 +39,7 @@ public class BeaconInfo implements Serializable {
         this.roomKey = null;
     }
 
-    public BeaconInfo(String namespaceId, String instanceId, String macAddress, String name, String color, int rssi, Double distance, boolean inRange) {
+    public BeaconInfo(String namespaceId, String instanceId, String macAddress, String name, int color, int rssi, Double distance, boolean inRange) {
         this.namespaceId = namespaceId;
         this.instanceId = instanceId;
         this.macAddress = macAddress;
@@ -99,11 +99,11 @@ public class BeaconInfo implements Serializable {
         this.name = name;
     }
 
-    public String getColor() {
+    public int getColor() {
         return color;
     }
 
-    public void setColor(String color) {
+    public void setColor(int color) {
         this.color = color;
     }
 
