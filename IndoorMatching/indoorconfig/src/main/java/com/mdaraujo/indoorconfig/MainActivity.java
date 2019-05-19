@@ -248,6 +248,8 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
                                     beaconFound.setRoomKey(roomKey);
                                     beaconFound.setPosX(retrievedBeacon.getPosX());
                                     beaconFound.setPosY(retrievedBeacon.getPosY());
+                                    beaconFound.setName(retrievedBeacon.getName());
+                                    beaconFound.setColor(retrievedBeacon.getColor());
                                     Log.i(TAG, "getBeaconsOfRoom: beaconFound.setRoomKey(roomKey) " + beaconFound.getInstanceId());
                                 } else {
                                     beaconsInfo.add(retrievedBeacon);
@@ -429,9 +431,10 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
                 startActivity(new Intent(this, LoginActivity.class));
                 finish();
                 return true;
-
+            case R.id.user_profile:
+                startActivity(new Intent(this, UserProfileActivity.class));
+                return true;
             default:
-                // User action not recognized.
                 return super.onOptionsItemSelected(item);
 
         }
