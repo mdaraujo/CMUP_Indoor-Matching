@@ -1,6 +1,7 @@
 package com.mdaraujo.indoorconfig;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -15,6 +16,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class UserProfileActivity extends AppCompatActivity implements RecyclerViewClickListener {
 
@@ -23,6 +25,7 @@ public class UserProfileActivity extends AppCompatActivity implements RecyclerVi
     private ArrayList<Category> categoriesInfo;
     private CategoryAdapter categoryAdapter;
     private RecyclerView recyclerView;
+    private Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,22 +46,24 @@ public class UserProfileActivity extends AppCompatActivity implements RecyclerVi
         recyclerView = (RecyclerView) findViewById(R.id.categories_recycler_view);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-//        recyclerView.setNestedScrollingEnabled(false);
 
+        context = getBaseContext();
         categoriesInfo = new ArrayList<>();
-        categoriesInfo.add(new Category(getResources().getString(R.string.movie_preferences), getResources().getString(R.string.movie_pref_desc), new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.movie_genres))), R.mipmap.ic_movie_foreground));
-        categoriesInfo.add(new Category(getResources().getString(R.string.music_preferences), getResources().getString(R.string.music_pref_desc), new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.music_genres))), R.mipmap.ic_music_foreground));
-        categoriesInfo.add(new Category(getResources().getString(R.string.book_preferences), getResources().getString(R.string.book_pref_desc), new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.book_genres))), R.mipmap.ic_book_foreground));categoryAdapter = new CategoryAdapter(categoriesInfo, this);
+        categoriesInfo.add(new Category(context, getResources().getString(R.string.movie_preferences), getResources().getString(R.string.movie_pref_desc), new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.movie_genres))), R.mipmap.ic_movie_foreground));
+        categoriesInfo.add(new Category(context, getResources().getString(R.string.music_preferences), getResources().getString(R.string.music_pref_desc), new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.music_genres))), R.mipmap.ic_music_foreground));
+        categoriesInfo.add(new Category(context, getResources().getString(R.string.book_preferences), getResources().getString(R.string.book_pref_desc), new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.book_genres))), R.mipmap.ic_book_foreground));
+        categoryAdapter = new CategoryAdapter(categoriesInfo, this);
         recyclerView.setAdapter(categoryAdapter);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        context = getBaseContext();
         categoriesInfo = new ArrayList<>();
-        categoriesInfo.add(new Category(getResources().getString(R.string.movie_preferences), getResources().getString(R.string.movie_pref_desc), new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.movie_genres))), R.mipmap.ic_movie_foreground));
-        categoriesInfo.add(new Category(getResources().getString(R.string.music_preferences), getResources().getString(R.string.music_pref_desc), new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.music_genres))), R.mipmap.ic_music_foreground));
-        categoriesInfo.add(new Category(getResources().getString(R.string.book_preferences), getResources().getString(R.string.book_pref_desc), new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.book_genres))), R.mipmap.ic_book_foreground));
+        categoriesInfo.add(new Category(context, getResources().getString(R.string.movie_preferences), getResources().getString(R.string.movie_pref_desc), new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.movie_genres))), R.mipmap.ic_movie_foreground));
+        categoriesInfo.add(new Category(context, getResources().getString(R.string.music_preferences), getResources().getString(R.string.music_pref_desc), new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.music_genres))), R.mipmap.ic_music_foreground));
+        categoriesInfo.add(new Category(context, getResources().getString(R.string.book_preferences), getResources().getString(R.string.book_pref_desc), new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.book_genres))), R.mipmap.ic_book_foreground));
         categoryAdapter = new CategoryAdapter(categoriesInfo, this);
         recyclerView.setAdapter(categoryAdapter);
     }
@@ -75,52 +80,53 @@ public class UserProfileActivity extends AppCompatActivity implements RecyclerVi
                     public void onClick(DialogInterface dialog, int id) {
                         Toast.makeText(UserProfileActivity.this, "Saved User Preferences", Toast.LENGTH_SHORT).show();
                     }
-                })
-                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        Toast.makeText(UserProfileActivity.this, "Canceled Operation", Toast.LENGTH_SHORT).show();
-                    }
                 });
+//                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+//                    public void onClick(DialogInterface dialog, int id) {
+//                        Toast.makeText(UserProfileActivity.this, "Canceled Operation", Toast.LENGTH_SHORT).show();
+//                    }
+//                });
 
-        ArrayList<Integer> movieSelectedItems = new ArrayList();
-        ArrayList<Integer> musicSelectedItems = new ArrayList();
-        ArrayList<Integer> bookSelectedItems = new ArrayList();
+        List<Integer> selectedItems = category.getCategoryPreferences();
 
         if (categoryName.contains("MOVIE")) {
-            builder.setMultiChoiceItems(R.array.movie_genres, null, new DialogInterface.OnMultiChoiceClickListener() {
+            builder.setMultiChoiceItems(R.array.movie_genres, category.getCategoryPreferencesCheckedItems(), new DialogInterface.OnMultiChoiceClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which, boolean isChecked) {
                     if (isChecked) {
-                        movieSelectedItems.add(which);
-                    } else if (movieSelectedItems.contains(which)) {
-                        movieSelectedItems.remove(Integer.valueOf(which));
+                        selectedItems.add(which);
+                    } else if (selectedItems.contains(which)) {
+                        selectedItems.remove(Integer.valueOf(which));
                     }
                 }
             });
+            category.setCategoryPreferences(selectedItems);
         } else if (categoryName.contains("MUSIC")) {
-            builder.setMultiChoiceItems(R.array.music_genres, null, new DialogInterface.OnMultiChoiceClickListener() {
+            builder.setMultiChoiceItems(R.array.music_genres, category.getCategoryPreferencesCheckedItems(), new DialogInterface.OnMultiChoiceClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which, boolean isChecked) {
                     if (isChecked) {
-                        musicSelectedItems.add(which);
-                    } else if (musicSelectedItems.contains(which)) {
-                        musicSelectedItems.remove(Integer.valueOf(which));
+                        selectedItems.add(which);
+                    } else if (selectedItems.contains(which)) {
+                        selectedItems.remove(Integer.valueOf(which));
                     }
                 }
             });
+            category.setCategoryPreferences(selectedItems);
         } else if (categoryName.contains("BOOK")) {
-            builder.setMultiChoiceItems(R.array.book_genres, null, new DialogInterface.OnMultiChoiceClickListener() {
+            builder.setMultiChoiceItems(R.array.book_genres, category.getCategoryPreferencesCheckedItems(), new DialogInterface.OnMultiChoiceClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which, boolean isChecked) {
                     if (isChecked) {
-                        bookSelectedItems.add(which);
-                    } else if (bookSelectedItems.contains(which)) {
-                        bookSelectedItems.remove(Integer.valueOf(which));
+                        selectedItems.add(which);
+                    } else if (selectedItems.contains(which)) {
+                        selectedItems.remove(Integer.valueOf(which));
                     }
                 }
             });
+            category.setCategoryPreferences(selectedItems);
         } else {
-
+            Log.d(TAG, "Invalid Category Value");
         }
 
         AlertDialog dialog = builder.create();

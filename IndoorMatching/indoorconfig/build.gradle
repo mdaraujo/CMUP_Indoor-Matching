@@ -46,6 +46,8 @@ dependencies {
     implementation 'com.google.firebase:firebase-firestore:18.2.0'
     implementation 'com.pes.materialcolorpicker:library:1.2.5'
     implementation project(path: ':commonlibrary')
+    implementation 'android.arch.persistence.room:runtime:1.1.1'
+    annotationProcessor 'android.arch.persistence.room:compiler:1.1.1'
 }
 
 apply plugin: 'com.google.gms.google-services'
