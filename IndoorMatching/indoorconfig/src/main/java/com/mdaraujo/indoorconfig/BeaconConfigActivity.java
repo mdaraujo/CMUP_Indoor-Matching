@@ -69,8 +69,8 @@ public class BeaconConfigActivity extends AppCompatActivity {
         macAddressView.setText(beacon.getMacAddress());
         nameView.setText(beacon.getName());
 
-        if (beacon.getColor() == 255){ //If color equals transparent <=> No Color
-            colorView.setBackgroundColor(Color.rgb(0,0,255));
+        if (beacon.getColor() == 255) { //If color equals transparent <=> No Color
+            colorView.setBackgroundColor(Color.rgb(0, 0, 255));
         } else {
             colorView.setBackgroundColor(beacon.getColor());
         }
@@ -84,6 +84,8 @@ public class BeaconConfigActivity extends AppCompatActivity {
                 colorPicker.enableAutoClose();
             }
         });
+
+        cpSelectedColor = beacon.getColor();
 
         colorPicker = new ColorPicker(this, Color.red(beacon.getColor()), Color.green(beacon.getColor()), Color.blue(beacon.getColor()));
         colorPicker.enableAutoClose();
