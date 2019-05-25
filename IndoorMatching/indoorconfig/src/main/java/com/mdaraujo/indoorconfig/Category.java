@@ -2,10 +2,13 @@ package com.mdaraujo.indoorconfig;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.Log;
+
+import com.google.gson.Gson;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -14,20 +17,36 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-//@Entity(tableName = "category_preferences")
+@Entity(tableName = "category_preferences")
 public class Category implements Serializable {
     public static final String CATEGORIES_COLLECTION = "categories";
 
     private static final Map<String, Integer> categoryIdMap = new HashMap<>();
+    private static final Gson gson = new Gson();
 
-//    @PrimaryKey
-//    @NonNull
-//    @ColumnInfo(name = "category")
+    @PrimaryKey
+    @NonNull
+    @ColumnInfo(name = "category_id")
     private int id;
+
+    @ColumnInfo(name = "category_name")
+    @NonNull
     private String name;
+
+    @Ignore
     private String description;
+
+    //    @TypeConverters(CategoryConverter.class)
+    //    @ColumnInfo(name = "category_genres")
+    @Ignore
     private List<String> genres;
+
+    @Ignore
     private int icon;
+
+    //    @TypeConverters(CategoryConverter.class)
+    //    @ColumnInfo(name = "category_preferences")
+    @Ignore
     private List<Integer> categoryPreferences;
 
     //TODO: Check better location+instantiation of this map.
@@ -37,23 +56,16 @@ public class Category implements Serializable {
         categoryIdMap.put(context.getResources().getString(R.string.book_preferences), 3);
     }
 
-    public Category(Context context, String name, String description, List<String> genres, int icon) {
+    public Category() {
+    }
+
+    public Category(Context context, String name, String description, ArrayList<String> genres, int icon) {
         setCategoryContext(context);
         this.id = categoryIdMap.get(name);
         this.name = name;
         this.description = description;
         this.genres = genres;
         this.icon = icon;
-        this.categoryPreferences = new ArrayList<>();
-    }
-
-    public Category(Context context, String name, String description, List<String> genres) {
-        setCategoryContext(context);
-        this.id = categoryIdMap.get(name);
-        this.name = name;
-        this.description = description;
-        this.genres = genres;
-        this.icon = R.drawable.color_circle;
         this.categoryPreferences = new ArrayList<>();
     }
 
@@ -73,9 +85,12 @@ public class Category implements Serializable {
         return checkedItems;
     }
 
-
     public int getId() {
         return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -116,5 +131,16 @@ public class Category implements Serializable {
 
     public void setCategoryPreferences(List<Integer> categoryPreferences) {
         this.categoryPreferences = categoryPreferences;
+    }
+
+    @Override
+    public String toString() {
+        return "Category{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", genres='" + genres + '\'' +
+                ", categoryPreferences='" + categoryPreferences + '\'' +
+                '}';
     }
 }

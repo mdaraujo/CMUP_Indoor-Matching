@@ -1,6 +1,7 @@
 package com.mdaraujo.indoorconfig;
 
 import android.app.AlertDialog;
+import android.arch.lifecycle.LiveData;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -14,6 +15,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.mdaraujo.indoorconfig.Database.CategoryRepository;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -26,6 +29,10 @@ public class UserProfileActivity extends AppCompatActivity implements RecyclerVi
     private CategoryAdapter categoryAdapter;
     private RecyclerView recyclerView;
     private Context context;
+
+    private CategoryRepository categoryRepository;
+    private LiveData<List<Category>> allCategories;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +53,9 @@ public class UserProfileActivity extends AppCompatActivity implements RecyclerVi
         recyclerView = (RecyclerView) findViewById(R.id.categories_recycler_view);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        categoryRepository = new CategoryRepository(getApplication());
+        allCategories = categoryRepository.getAllCategories();
 
         context = getBaseContext();
         categoriesInfo = new ArrayList<>();
@@ -74,20 +84,10 @@ public class UserProfileActivity extends AppCompatActivity implements RecyclerVi
         String categoryName = category.getName().toUpperCase();
         Log.d(TAG, "CATEGORY CLICKED");
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(category.getName())
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        Toast.makeText(UserProfileActivity.this, "Saved User Preferences", Toast.LENGTH_SHORT).show();
-                    }
-                });
-//                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-//                    public void onClick(DialogInterface dialog, int id) {
-//                        Toast.makeText(UserProfileActivity.this, "Canceled Operation", Toast.LENGTH_SHORT).show();
-//                    }
-//                });
-
         List<Integer> selectedItems = category.getCategoryPreferences();
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(category.getName());
 
         if (categoryName.contains("MOVIE")) {
             builder.setMultiChoiceItems(R.array.movie_genres, category.getCategoryPreferencesCheckedItems(), new DialogInterface.OnMultiChoiceClickListener() {
@@ -128,6 +128,15 @@ public class UserProfileActivity extends AppCompatActivity implements RecyclerVi
         } else {
             Log.d(TAG, "Invalid Category Value");
         }
+
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                Toast.makeText(UserProfileActivity.this, "Saved User Preferences", Toast.LENGTH_SHORT).show();
+                Log.d("CATEGORY_DESC", category.toString());
+                categoryRepository.insert(category);
+                Log.d("DB_REPO", String.valueOf(categoryRepository.getAllCategories().getValue()));
+            }
+        });
 
         AlertDialog dialog = builder.create();
         dialog.show();
