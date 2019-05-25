@@ -32,6 +32,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.mdaraujo.commonlibrary.RoomCanvasView;
 import com.mdaraujo.commonlibrary.model.BeaconInfo;
 import com.mdaraujo.commonlibrary.model.Room;
 
@@ -58,6 +59,8 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
 
     private BeaconManager mBeaconManager;
 
+    private RoomCanvasView roomCanvas;
+
     private FirebaseFirestore firestoreDb;
     private Room room;
     private String roomKey;
@@ -65,7 +68,6 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
     private BeaconsAdapter beaconsAdapter;
     private RecyclerView recyclerView;
 
-    private Button scanBtn;
     private TextView roomNameView;
     private Button roomAddBtn;
     private Button roomEditBtn;
@@ -102,10 +104,11 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setNestedScrollingEnabled(false);
 
-        scanBtn = findViewById(R.id.scan_btn);
         roomNameView = findViewById(R.id.room_name_text);
         roomAddBtn = findViewById(R.id.room_add_btn);
         roomEditBtn = findViewById(R.id.room_edit_btn);
+
+        roomCanvas = findViewById(R.id.room_canvas);
 
         verifyBluetooth();
 
@@ -147,7 +150,6 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
         mBeaconManager.setForegroundBetweenScanPeriod(1200L);
 
         mBeaconManager.bind(this);
-        scanBtn.setText(R.string.stop);
     }
 
     public void onBeaconServiceConnect() {
@@ -195,6 +197,8 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
         }
         Collections.sort(beaconsInfo, (o1, o2) -> o1.getInstanceId().compareTo(o2.getInstanceId()));
         beaconsAdapter.notifyDataSetChanged();
+
+        roomCanvas.drawBeacons(new ArrayList<>(beaconsInfo));
     }
 
     @Override
@@ -404,17 +408,6 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
         }
     }
 
-
-    public void scanBtnClick(View view) {
-        if (mBeaconManager.isBound(this)) {
-            mBeaconManager.unbind(this);
-            scanBtn.setText(R.string.start);
-        } else {
-            mBeaconManager.bind(this);
-            scanBtn.setText(R.string.stop);
-        }
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -434,6 +427,11 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
             case R.id.user_profile:
                 startActivity(new Intent(this, UserProfileActivity.class));
                 return true;
+            case R.id.action_refresh:
+                if (mBeaconManager.isBound(this)) {
+                    mBeaconManager.unbind(this);
+                }
+                mBeaconManager.bind(this);
             default:
                 return super.onOptionsItemSelected(item);
 

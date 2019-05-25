@@ -10,7 +10,14 @@
 
     <item
         android:id="@+id/user_profile"
-        android:title="Profile"
-        app:showAsAction="always" />
+        android:title="@string/title_activity_user_profile"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_refresh"
+        android:title="@string/refresh_button"
+        android:icon="@mipmap/baseline_refresh_white_18dp"
+        app:showAsAction="ifRoom"
+        />
 
 </menu>

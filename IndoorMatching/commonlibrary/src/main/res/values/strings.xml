@@ -2,8 +2,7 @@
     <string name="app_name">Common Library</string>
     <string name="facebook_app_id">2420445654853612</string>
     <string name="fb_login_protocol_scheme">fb2420445654853612</string>
-    <string name="start">Start</string>
-    <string name="stop">Stop</string>
+    <string name="refresh_button">Refresh</string>
     <string name="room_not_found">Room not found!</string>
     <string name="room_new">Add New Room</string>
     <string name="room_edit">Edit Room</string>
@@ -17,8 +16,6 @@
     <string name="delete">Delete</string>
     <string name="room_name">Name</string>
     <string name="room_server_url">Server URL</string>
-    <string name="room_width">Width</string>
-    <string name="room_height">Height</string>
     <string name="beacon_name">Name</string>
     <string name="beacon_color">Color</string>
     <string name="movie_preferences">Movie Preferences</string>

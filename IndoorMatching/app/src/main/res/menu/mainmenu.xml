@@ -8,4 +8,11 @@
         android:title="@string/com_facebook_loginview_log_out_button"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/action_refresh"
+        android:title="@string/refresh_button"
+        android:icon="@mipmap/baseline_refresh_white_18dp"
+        app:showAsAction="ifRoom"
+        />
+
 </menu>

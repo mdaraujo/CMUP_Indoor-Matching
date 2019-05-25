@@ -14,8 +14,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -29,6 +27,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.mdaraujo.commonlibrary.RoomCanvasView;
 import com.mdaraujo.commonlibrary.model.BeaconInfo;
 import com.mdaraujo.commonlibrary.model.Room;
 
@@ -59,7 +58,6 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
     private Room room;
     private List<BeaconInfo> beaconsInfo;
 
-    private Button scanBtn;
     private TextView roomNameView;
 
 
@@ -91,7 +89,6 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
         room = null;
         beaconsInfo = new ArrayList<>();
 
-        scanBtn = findViewById(R.id.scan_btn);
         roomNameView = findViewById(R.id.room_name_text);
         roomCanvas = findViewById(R.id.room_canvas);
 
@@ -129,7 +126,6 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
         mBeaconManager.setForegroundBetweenScanPeriod(1200L);
 
         mBeaconManager.bind(this);
-        scanBtn.setText(R.string.stop);
     }
 
     public void onBeaconServiceConnect() {
@@ -327,16 +323,6 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
         }
     }
 
-    public void scanBtnClick(View view) {
-        if (mBeaconManager.isBound(this)) {
-            mBeaconManager.unbind(this);
-            scanBtn.setText(R.string.start);
-        } else {
-            mBeaconManager.bind(this);
-            scanBtn.setText(R.string.stop);
-        }
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -353,7 +339,11 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
                 startActivity(new Intent(this, LoginActivity.class));
                 finish();
                 return true;
-
+            case R.id.action_refresh:
+                if (mBeaconManager.isBound(this)) {
+                    mBeaconManager.unbind(this);
+                }
+                mBeaconManager.bind(this);
             default:
                 // If we got here, the user's action was not recognized.
                 // Invoke the superclass to handle it.

@@ -31,8 +31,9 @@ public class BeaconViewHolder extends RecyclerView.ViewHolder implements View.On
 
     public void bindData(final BeaconInfo viewModel) {
         beaconColor.setColorFilter(viewModel.getColor());
-        beaconName.setText("Name: " + viewModel.getName());
-        coordinates.setText(viewModel.getRoomKey() != null ? "X: " + viewModel.getPosX() + " Y: " + viewModel.getPosY() : "Configure ->");
+        beaconName.setText(viewModel.getName());
+        String posText = viewModel.getRoomKey() != null ? "X: " + viewModel.getPosX() + " Y: " + viewModel.getPosY() : "Configure ->";
+        coordinates.setText(String.format("%.2fm    %s", viewModel.getDistance(), posText));
         itemView.setBackgroundColor(viewModel.isInRange() ? inRangeColor : notInRangeColor);
     }
 

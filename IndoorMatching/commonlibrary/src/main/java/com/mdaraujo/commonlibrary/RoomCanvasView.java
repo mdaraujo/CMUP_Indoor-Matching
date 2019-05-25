@@ -1,23 +1,18 @@
-package com.mdaraujo.indoormatching;
+package com.mdaraujo.commonlibrary;
 
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.PointF;
-import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 
 import com.mdaraujo.commonlibrary.model.BeaconInfo;
 
-import org.altbeacon.beacon.Beacon;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 
 public class RoomCanvasView extends View {
 
@@ -48,7 +43,7 @@ public class RoomCanvasView extends View {
             canvas.drawCircle(beacon.getPosX(), beacon.getPosY(), radius, mPaint);
         }
 
-        Log.d(TAG, "Points: " + beaconCircles);
+//        Log.d(TAG, "Points: " + beaconCircles);
 
     }
 
@@ -69,6 +64,7 @@ public class RoomCanvasView extends View {
                     b3.getPosX(), b3.getPosY(), b3.getDistance().floatValue());
 
             beaconsInfo.add(phone);
+            Log.d(TAG, phone.toString());
         }
 
         float maxBeaconX = 0;
@@ -124,7 +120,6 @@ public class RoomCanvasView extends View {
             float x = marginX + (beaconInfo.getPosX() - minX) * ratio;
             float y = marginY + canvasHeight - ((beaconInfo.getPosY() - minY) * ratio);
             beaconCircles.add(new BeaconInfo(beaconInfo.getName(), beaconInfo.getColor(), x, y));
-            System.out.println(beaconInfo.getDistance());
         }
 
         // remove added phone

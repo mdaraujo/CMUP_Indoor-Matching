@@ -27,34 +27,23 @@
         app:layout_constraintStart_toEndOf="@+id/user_photo"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
-        android:id="@+id/scan_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        android:fontFamily="sans-serif-light"
-        android:onClick="scanBtnClick"
-        android:text="@string/start"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <TextView
         android:id="@+id/room_name_text"
-        android:layout_width="236dp"
-        android:layout_height="35dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:fontFamily="sans-serif"
         android:text="@string/room_not_found"
-        android:textSize="24sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/user_photo" />
+        android:textSize="18sp"
+        app:layout_constraintStart_toEndOf="@+id/user_photo"
+        app:layout_constraintTop_toBottomOf="@+id/user_name_text" />
 
-    <com.mdaraujo.indoormatching.RoomCanvasView
+    <com.mdaraujo.commonlibrary.RoomCanvasView
         android:id="@+id/room_canvas"
-        android:layout_width="wrap_content"
-        android:layout_height="300dp"
+        android:layout_width="0dp"
+        android:layout_height="200dp"
+        android:layout_marginTop="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/room_name_text" />
