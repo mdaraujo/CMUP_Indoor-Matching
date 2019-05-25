@@ -45,7 +45,7 @@
         android:layout_height="35dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        android:fontFamily="cursive"
+        android:fontFamily="sans-serif"
         android:text="@string/room_not_found"
         android:textSize="24sp"
         app:layout_constraintStart_toStartOf="parent"
@@ -54,14 +54,21 @@
     <com.mdaraujo.indoormatching.RoomCanvasView
         android:id="@+id/room_canvas"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_height="300dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/room_name_text"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintTop_toBottomOf="@+id/room_name_text" />
+
+    <TextView
+        android:id="@+id/match_name"
+        android:layout_width="236dp"
+        android:layout_height="35dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="16dp"
+        android:fontFamily="sans-serif"
+        android:text="@string/match_not_found"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </android.support.constraint.ConstraintLayout>

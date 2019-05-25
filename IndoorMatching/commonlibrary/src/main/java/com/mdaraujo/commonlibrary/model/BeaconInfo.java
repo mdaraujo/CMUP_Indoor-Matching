@@ -39,18 +39,11 @@ public class BeaconInfo implements Serializable {
         this.roomKey = null;
     }
 
-    public BeaconInfo(String namespaceId, String instanceId, String macAddress, String name, int color, int rssi, Double distance, boolean inRange) {
-        this.namespaceId = namespaceId;
-        this.instanceId = instanceId;
-        this.macAddress = macAddress;
+    public BeaconInfo(String name, int color, float posX, float posY) {
         this.name = name;
         this.color = color;
-        this.rssi = rssi;
-        this.distance = distance;
-        this.inRange = inRange;
-        this.posX = 0;
-        this.posY = 0;
-        this.roomKey = null;
+        this.posX = posX;
+        this.posY = posY;
     }
 
     public Map<String, Object> toMap() {
@@ -156,5 +149,15 @@ public class BeaconInfo implements Serializable {
 
     public void setRoomKey(String roomKey) {
         this.roomKey = roomKey;
+    }
+
+    @Override
+    public String toString() {
+        return "BeaconInfo{" +
+                "name='" + name + '\'' +
+                ", color=" + color +
+                ", posX=" + posX +
+                ", posY=" + posY +
+                '}';
     }
 }

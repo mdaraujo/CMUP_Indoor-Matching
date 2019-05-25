@@ -42,7 +42,6 @@ import org.altbeacon.beacon.service.ArmaRssiFilter;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import static com.mdaraujo.commonlibrary.CommonParams.PERMISSION_REQUEST_COARSE_LOCATION;
@@ -213,6 +212,8 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
                                     beaconFound.setRoomKey(roomKey);
                                     beaconFound.setPosX(retrievedBeacon.getPosX());
                                     beaconFound.setPosY(retrievedBeacon.getPosY());
+                                    beaconFound.setName(retrievedBeacon.getName());
+                                    beaconFound.setColor(retrievedBeacon.getColor());
                                     Log.i(TAG, "getBeaconsOfRoom: beaconFound.setRoomKey(roomKey) " + beaconFound.getInstanceId());
                                 } else {
                                     beaconsInfo.add(retrievedBeacon);

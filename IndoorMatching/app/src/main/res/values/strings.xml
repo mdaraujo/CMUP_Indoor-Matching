@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Indoor Matching</string>
+    <string name="match_not_found">Match not found!</string>
 </resources>
