@@ -52,19 +52,24 @@ public class RoomCanvasView extends View {
         if (beaconsInfo.isEmpty())
             return;
 
-        BeaconInfo phone = null;
+        List<BeaconInfo> beaconsWithDistance = new ArrayList<>();
 
-        if (beaconsInfo.size() >= 3) {
-            Collections.sort(beaconsInfo, (o1, o2) -> o1.getDistance().compareTo(o2.getDistance()));
-            BeaconInfo b1 = beaconsInfo.get(0);
-            BeaconInfo b2 = beaconsInfo.get(1);
-            BeaconInfo b3 = beaconsInfo.get(2);
-            phone = trackPhone(b1.getPosX(), b1.getPosY(), b1.getDistance().floatValue(),
+        for (BeaconInfo beaconInfo : beaconsInfo)
+            if (beaconInfo.getDistance() != null)
+                beaconsWithDistance.add(beaconInfo);
+
+        if (beaconsWithDistance.size() >= 3) {
+            Collections.sort(beaconsWithDistance, (o1, o2) -> o1.getDistance().compareTo(o2.getDistance()));
+            BeaconInfo b1 = beaconsWithDistance.get(0);
+            BeaconInfo b2 = beaconsWithDistance.get(1);
+            BeaconInfo b3 = beaconsWithDistance.get(2);
+            BeaconInfo phone = trackPhone(b1.getPosX(), b1.getPosY(), b1.getDistance().floatValue(),
                     b2.getPosX(), b2.getPosY(), b2.getDistance().floatValue(),
                     b3.getPosX(), b3.getPosY(), b3.getDistance().floatValue());
 
+            Log.d(TAG, "Points: " + beaconsWithDistance);
             beaconsInfo.add(phone);
-            Log.d(TAG, phone.toString());
+            Log.d(TAG, phone.toString() + "\n\n");
         }
 
         float maxBeaconX = 0;
@@ -121,12 +126,6 @@ public class RoomCanvasView extends View {
             float y = marginY + canvasHeight - ((beaconInfo.getPosY() - minY) * ratio);
             beaconCircles.add(new BeaconInfo(beaconInfo.getName(), beaconInfo.getColor(), x, y));
         }
-
-        // remove added phone
-        if (phone != null) {
-            beaconsInfo.remove(phone);
-        }
-
 
         //important. Refreshes the view by calling onDraw function
         invalidate();

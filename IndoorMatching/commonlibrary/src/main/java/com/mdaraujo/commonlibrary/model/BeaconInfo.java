@@ -155,7 +155,7 @@ public class BeaconInfo implements Serializable {
     public String toString() {
         return "BeaconInfo{" +
                 "name='" + name + '\'' +
-                ", color=" + color +
+                ", distance=" + distance +
                 ", posX=" + posX +
                 ", posY=" + posY +
                 '}';

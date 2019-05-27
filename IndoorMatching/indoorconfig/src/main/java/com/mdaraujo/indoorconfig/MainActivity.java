@@ -198,7 +198,13 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
         Collections.sort(beaconsInfo, (o1, o2) -> o1.getInstanceId().compareTo(o2.getInstanceId()));
         beaconsAdapter.notifyDataSetChanged();
 
-        roomCanvas.drawBeacons(new ArrayList<>(beaconsInfo));
+        List<BeaconInfo> beaconsToDraw = new ArrayList<>();
+
+        for (BeaconInfo beaconInfo : beaconsInfo)
+            if (beaconInfo.getRoomKey() != null)
+                beaconsToDraw.add(beaconInfo);
+
+        roomCanvas.drawBeacons(beaconsToDraw);
     }
 
     @Override
