@@ -38,6 +38,7 @@ import org.altbeacon.beacon.BeaconParser;
 import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
 import org.altbeacon.beacon.service.ArmaRssiFilter;
+import org.altbeacon.beacon.service.RunningAverageRssiFilter;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -81,10 +82,11 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
 
         firestoreDb = FirebaseFirestore.getInstance();
 
-//        BeaconManager.setRssiFilterImplClass(RunningAverageRssiFilter.class);
-//        RunningAverageRssiFilter.setSampleExpirationMilliseconds(5000l);
+        BeaconManager.setRssiFilterImplClass(RunningAverageRssiFilter.class);
+        RunningAverageRssiFilter.setSampleExpirationMilliseconds(8000L);
 
-        BeaconManager.setRssiFilterImplClass(ArmaRssiFilter.class);
+//        BeaconManager.setRssiFilterImplClass(ArmaRssiFilter.class);
+//        ArmaRssiFilter.setDEFAULT_ARMA_SPEED(0.3);
 
         room = null;
         beaconsInfo = new ArrayList<>();
@@ -122,8 +124,8 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
 //        // set the time between each scan to be 1 hour (3600 seconds)
 //        mBeaconManager.setBackgroundBetweenScanPeriod(3600000l);
 
-        mBeaconManager.setForegroundScanPeriod(1100L);
-        mBeaconManager.setForegroundBetweenScanPeriod(1200L);
+        mBeaconManager.setForegroundScanPeriod(1000L);
+        mBeaconManager.setForegroundBetweenScanPeriod(0L); // duration spent not scanning between each Bluetooth scan cycle
 
         mBeaconManager.bind(this);
     }
