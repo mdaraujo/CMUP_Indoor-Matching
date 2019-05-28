@@ -39,7 +39,14 @@ import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
 import org.altbeacon.beacon.service.ArmaRssiFilter;
 import org.altbeacon.beacon.service.RunningAverageRssiFilter;
+import org.eclipse.paho.android.service.MqttAndroidClient;
+import org.eclipse.paho.client.mqttv3.IMqttActionListener;
+import org.eclipse.paho.client.mqttv3.IMqttToken;
+import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -60,6 +67,8 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
     private List<BeaconInfo> beaconsInfo;
 
     private TextView roomNameView;
+
+    private MqttAndroidClient client;
 
 
     @Override
@@ -82,11 +91,11 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
 
         firestoreDb = FirebaseFirestore.getInstance();
 
-        BeaconManager.setRssiFilterImplClass(RunningAverageRssiFilter.class);
-        RunningAverageRssiFilter.setSampleExpirationMilliseconds(8000L);
+//        BeaconManager.setRssiFilterImplClass(RunningAverageRssiFilter.class);
+//        RunningAverageRssiFilter.setSampleExpirationMilliseconds(3000L);
 
-//        BeaconManager.setRssiFilterImplClass(ArmaRssiFilter.class);
-//        ArmaRssiFilter.setDEFAULT_ARMA_SPEED(0.3);
+        BeaconManager.setRssiFilterImplClass(ArmaRssiFilter.class);
+//        ArmaRssiFilter.setDEFAULT_ARMA_SPEED(0.1);
 
         room = null;
         beaconsInfo = new ArrayList<>();
@@ -96,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
 
         verifyBluetooth();
 
-        Log.i(TAG, "onCreate");
+        Log.d(TAG, "onCreate");
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             // Android M Permission check
@@ -110,11 +119,57 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
                 builder.show();
             }
         }
+
+        String clientId = MqttClient.generateClientId();
+        client = new MqttAndroidClient(this.getApplicationContext(), "tcp://192.168.43.100:1883",
+                clientId);
+
+        try {
+            IMqttToken token = client.connect();
+            token.setActionCallback(new IMqttActionListener() {
+                @Override
+                public void onSuccess(IMqttToken asyncActionToken) {
+                    // We are connected
+                    Log.d(TAG, "MqttAndroidClient: onSuccess");
+                    sendMessage("laptop/battery", "the payload");
+                }
+
+                @Override
+                public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
+                    // Something went wrong e.g. connection timeout or firewall problems
+                    Log.d(TAG, "MqttAndroidClient: onFailure");
+
+                }
+            });
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private void sendMessage(String topic, String payload) {
+        byte[] encodedPayload;
+        try {
+            encodedPayload = payload.getBytes("UTF-8");
+            MqttMessage message = new MqttMessage(encodedPayload);
+            client.publish(topic, message);
+        } catch (UnsupportedEncodingException | MqttException e) {
+            Log.d(TAG, e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
+
+        refreshScan();
+    }
+
+    private void refreshScan() {
+        room = null;
+        beaconsInfo = new ArrayList<>();
+
         mBeaconManager = BeaconManager.getInstanceForApplication(this.getApplicationContext());
         mBeaconManager.getBeaconParsers().add(new BeaconParser().
                 setBeaconLayout(BeaconParser.EDDYSTONE_UID_LAYOUT));
@@ -124,7 +179,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
 //        // set the time between each scan to be 1 hour (3600 seconds)
 //        mBeaconManager.setBackgroundBetweenScanPeriod(3600000l);
 
-        mBeaconManager.setForegroundScanPeriod(1000L);
+        mBeaconManager.setForegroundScanPeriod(300L);
         mBeaconManager.setForegroundBetweenScanPeriod(0L); // duration spent not scanning between each Bluetooth scan cycle
 
         mBeaconManager.bind(this);
@@ -234,6 +289,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
     private void getRoomOfBeacon(Beacon foundBeacon) {
         String instanceId = foundBeacon.getId2().toHexString();
 
+        // do query on beacon MAC address
         Query queryBeacon = firestoreDb.collection(BEACONS_COLLECTION_NAME)
                 .whereEqualTo("instanceId", instanceId)
                 .limit(1);
@@ -351,7 +407,7 @@ public class MainActivity extends AppCompatActivity implements BeaconConsumer, R
                 if (mBeaconManager.isBound(this)) {
                     mBeaconManager.unbind(this);
                 }
-                mBeaconManager.bind(this);
+                refreshScan();
             default:
                 // If we got here, the user's action was not recognized.
                 // Invoke the superclass to handle it.

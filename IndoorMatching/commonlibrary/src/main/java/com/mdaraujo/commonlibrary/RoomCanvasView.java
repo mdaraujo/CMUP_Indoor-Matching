@@ -26,6 +26,7 @@ public class RoomCanvasView extends View {
     private static final int nRandomGuesses = 10;
     private static final int nInformedGuesses = 100;
     private static final float informedRange = 1.5f;
+    private static final float moveFactor = 0.1f;
 
     private Paint mPaint;
     private List<BeaconInfo> beaconCircles;
@@ -153,13 +154,13 @@ public class RoomCanvasView extends View {
             }
 
             if (avgPosition != null) {
-                avgPosition.x = 0.90f * avgPosition.x + 0.1f * bestGuess.x;
-                avgPosition.y = 0.90f * avgPosition.y + 0.1f * bestGuess.y;
+                avgPosition.x = (1 - moveFactor) * avgPosition.x + moveFactor * bestGuess.x;
+                avgPosition.y = (1 - moveFactor) * avgPosition.y + moveFactor * bestGuess.y;
             } else {
                 avgPosition = bestGuess;
             }
 
-            Log.d(TAG, String.format("Max Prob: %f, Better Guess: X: %f, Y: %f", maxProb, avgPosition.x, avgPosition.y));
+//            Log.d(TAG, String.format("Max Prob: %f, Better Guess: X: %f, Y: %f", maxProb, avgPosition.x, avgPosition.y));
 
             beaconsInfo.add(new BeaconInfo("Phone", Color.BLACK, avgPosition.x, avgPosition.y));
         }
