@@ -22,12 +22,15 @@ import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
 import org.altbeacon.beacon.BeaconManager;
 import org.altbeacon.beacon.BeaconParser;
+import org.altbeacon.beacon.Identifier;
 import org.altbeacon.beacon.Region;
+import org.altbeacon.beacon.powersave.BackgroundPowerSaver;
 import org.altbeacon.beacon.service.ArmaRssiFilter;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.mdaraujo.commonlibrary.CommonParams.NAMESPACE_ID;
 import static com.mdaraujo.commonlibrary.CommonParams.PERMISSION_REQUEST_COARSE_LOCATION;
 import static com.mdaraujo.commonlibrary.model.BeaconInfo.BEACONS_COLLECTION_NAME;
 
@@ -35,31 +38,17 @@ public class BaseMainActivity extends AppCompatActivity implements BeaconConsume
 
     private static String TAG = "BaseMainActivity";
 
-    protected RoomCanvasView roomCanvas;
-
+    private BackgroundPowerSaver backgroundPowerSaver;
     protected BeaconManager mBeaconManager;
     protected FirebaseFirestore firestoreDb;
+
+    protected RoomCanvasView roomCanvas;
     protected Room room;
     protected List<BeaconInfo> beaconsInfo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        firestoreDb = FirebaseFirestore.getInstance();
-
-//        BeaconManager.setRssiFilterImplClass(RunningAverageRssiFilter.class);
-//        RunningAverageRssiFilter.setSampleExpirationMilliseconds(3000L);
-
-        BeaconManager.setRssiFilterImplClass(ArmaRssiFilter.class);
-//        ArmaRssiFilter.setDEFAULT_ARMA_SPEED(0.1);
-
-        room = null;
-        beaconsInfo = new ArrayList<>();
-
-        verifyBluetooth();
-
-        Log.d(TAG, "onCreate");
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             // Android M Permission check
@@ -73,6 +62,24 @@ public class BaseMainActivity extends AppCompatActivity implements BeaconConsume
                 builder.show();
             }
         }
+
+        verifyBluetooth();
+
+        // enables auto battery saving of about 60%
+        backgroundPowerSaver = new BackgroundPowerSaver(this);
+
+        firestoreDb = FirebaseFirestore.getInstance();
+
+//        BeaconManager.setRssiFilterImplClass(RunningAverageRssiFilter.class);
+//        RunningAverageRssiFilter.setSampleExpirationMilliseconds(3000L);
+
+        BeaconManager.setRssiFilterImplClass(ArmaRssiFilter.class);
+//        ArmaRssiFilter.setDEFAULT_ARMA_SPEED(0.1);
+
+        mBeaconManager = BeaconManager.getInstanceForApplication(this.getApplicationContext());
+        mBeaconManager.getBeaconParsers().add(new BeaconParser().
+                setBeaconLayout(BeaconParser.EDDYSTONE_UID_LAYOUT));
+
     }
 
     @Override
@@ -86,16 +93,9 @@ public class BaseMainActivity extends AppCompatActivity implements BeaconConsume
         room = null;
         beaconsInfo = new ArrayList<>();
 
-        mBeaconManager = BeaconManager.getInstanceForApplication(this.getApplicationContext());
-        mBeaconManager.getBeaconParsers().add(new BeaconParser().
-                setBeaconLayout(BeaconParser.EDDYSTONE_UID_LAYOUT));
+        // reset object that estimates phone position
 
-//        // set the duration of the scan to be 1.1 seconds
-//        mBeaconManager.setBackgroundScanPeriod(1100l);
-//        // set the time between each scan to be 1 hour (3600 seconds)
-//        mBeaconManager.setBackgroundBetweenScanPeriod(3600000l);
-
-        mBeaconManager.setForegroundScanPeriod(300L);
+        mBeaconManager.setForegroundScanPeriod(400L);
         mBeaconManager.setForegroundBetweenScanPeriod(0L); // duration spent not scanning between each Bluetooth scan cycle
 
         mBeaconManager.bind(this);
@@ -107,13 +107,18 @@ public class BaseMainActivity extends AppCompatActivity implements BeaconConsume
         mBeaconManager.unbind(this);
     }
 
+    @Override
     public void onBeaconServiceConnect() {
-        Region region = new Region("all-beacons-region", null, null, null);
         try {
-            mBeaconManager.startRangingBeaconsInRegion(region);
+            mBeaconManager.startRangingBeaconsInRegion(getCustomRegion());
         } catch (RemoteException e) {
             e.printStackTrace();
         }
+    }
+
+    public static Region getCustomRegion() {
+        Identifier customNamespaceId = Identifier.parse(NAMESPACE_ID);
+        return new Region("indoor-matching-beacons-region", customNamespaceId, null, null);
     }
 
     protected BeaconInfo getBeaconFromList(String instanceId) {

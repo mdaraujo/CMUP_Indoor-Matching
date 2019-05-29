@@ -49,7 +49,6 @@ public class MainActivity extends BaseMainActivity implements RangeNotifier {
 
     private MqttAndroidClient client;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,7 +69,6 @@ public class MainActivity extends BaseMainActivity implements RangeNotifier {
 
         roomNameView = findViewById(R.id.room_name_text);
         roomCanvas = findViewById(R.id.room_canvas);
-
 
         String clientId = MqttClient.generateClientId();
         client = new MqttAndroidClient(this.getApplicationContext(), "tcp://192.168.43.100:1883",
@@ -207,7 +205,6 @@ public class MainActivity extends BaseMainActivity implements RangeNotifier {
                 });
     }
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -229,9 +226,8 @@ public class MainActivity extends BaseMainActivity implements RangeNotifier {
                     mBeaconManager.unbind(this);
                 }
                 refreshScan();
+                return true;
             default:
-                // If we got here, the user's action was not recognized.
-                // Invoke the superclass to handle it.
                 return super.onOptionsItemSelected(item);
 
         }

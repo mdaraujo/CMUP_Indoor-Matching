@@ -265,14 +265,15 @@ public class MainActivity extends BaseMainActivity implements RangeNotifier, Rec
                 startActivity(new Intent(this, LoginActivity.class));
                 finish();
                 return true;
-            case R.id.user_profile:
-                startActivity(new Intent(this, UserProfileActivity.class));
-                return true;
             case R.id.action_refresh:
                 if (mBeaconManager.isBound(this)) {
                     mBeaconManager.unbind(this);
                 }
                 refreshScan();
+                return true;
+            case R.id.user_profile:
+                startActivity(new Intent(this, UserProfileActivity.class));
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
 
