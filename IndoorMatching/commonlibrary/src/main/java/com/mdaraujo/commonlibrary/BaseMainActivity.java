@@ -3,6 +3,8 @@ package com.mdaraujo.commonlibrary;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.PointF;
 import android.os.Build;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
@@ -23,18 +25,21 @@ import org.altbeacon.beacon.BeaconConsumer;
 import org.altbeacon.beacon.BeaconManager;
 import org.altbeacon.beacon.BeaconParser;
 import org.altbeacon.beacon.Identifier;
+import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
 import org.altbeacon.beacon.powersave.BackgroundPowerSaver;
 import org.altbeacon.beacon.service.ArmaRssiFilter;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import static com.mdaraujo.commonlibrary.CommonParams.NAMESPACE_ID;
 import static com.mdaraujo.commonlibrary.CommonParams.PERMISSION_REQUEST_COARSE_LOCATION;
 import static com.mdaraujo.commonlibrary.model.BeaconInfo.BEACONS_COLLECTION_NAME;
 
-public class BaseMainActivity extends AppCompatActivity implements BeaconConsumer {
+public class BaseMainActivity extends AppCompatActivity implements BeaconConsumer, RangeNotifier {
 
     private static String TAG = "BaseMainActivity";
 
@@ -45,6 +50,8 @@ public class BaseMainActivity extends AppCompatActivity implements BeaconConsume
     protected RoomCanvasView roomCanvas;
     protected Room room;
     protected List<BeaconInfo> beaconsInfo;
+
+    private PositionEstimation positionEstimation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +87,7 @@ public class BaseMainActivity extends AppCompatActivity implements BeaconConsume
         mBeaconManager.getBeaconParsers().add(new BeaconParser().
                 setBeaconLayout(BeaconParser.EDDYSTONE_UID_LAYOUT));
 
+        positionEstimation = new PositionEstimation();
     }
 
     @Override
@@ -93,6 +101,7 @@ public class BaseMainActivity extends AppCompatActivity implements BeaconConsume
         room = null;
         beaconsInfo = new ArrayList<>();
         roomCanvas.reset();
+        positionEstimation.reset();
 
         mBeaconManager.setForegroundScanPeriod(400L);
         mBeaconManager.setForegroundBetweenScanPeriod(0L); // duration spent not scanning between each Bluetooth scan cycle
@@ -113,6 +122,59 @@ public class BaseMainActivity extends AppCompatActivity implements BeaconConsume
         } catch (RemoteException e) {
             e.printStackTrace();
         }
+        mBeaconManager.addRangeNotifier(this);
+    }
+
+    @Override
+    public void didRangeBeaconsInRegion(Collection<Beacon> foundBeacons, Region region) {
+
+        for (BeaconInfo beacon : beaconsInfo) {
+            beacon.setInRange(false);
+        }
+
+        for (Beacon foundBeacon : foundBeacons) {
+            if (foundBeacon.getServiceUuid() == 0xfeaa && foundBeacon.getBeaconTypeCode() == 0x00) {
+                // This is a Eddystone-UID frame
+
+                BeaconInfo beaconInfo = getBeaconFromList(foundBeacon.getId2().toHexString());
+
+                if (beaconInfo == null) {
+
+                    if (room == null) {
+                        getRoomOfBeacon(foundBeacon);
+                    } else {
+                        addFoundBeaconToList(foundBeacon);
+                    }
+
+                } else {
+                    beaconInfo.setDistance(foundBeacon.getDistance());
+                    beaconInfo.setRssi(foundBeacon.getRssi());
+                    beaconInfo.setInRange(true);
+                }
+            }
+        }
+
+        if (foundBeacons.size() > 0) {
+            Collections.sort(beaconsInfo, (o1, o2) -> o1.getInstanceId().compareTo(o2.getInstanceId()));
+
+            List<BeaconInfo> knownBeacons = new ArrayList<>();
+
+            for (BeaconInfo beaconInfo : beaconsInfo)
+                if (beaconInfo.getRoomKey() != null)
+                    knownBeacons.add(beaconInfo);
+
+            positionEstimation.estimate(knownBeacons);
+
+            PointF estimation = positionEstimation.getEstimation();
+            PointF bestGuess = positionEstimation.getCurrentBestGuess();
+
+            if (estimation != null) {
+                knownBeacons.add(new BeaconInfo("Best Guess", Color.GRAY, bestGuess.x, bestGuess.y));
+                knownBeacons.add(new BeaconInfo("Phone", Color.BLACK, estimation.x, estimation.y));
+            }
+
+            roomCanvas.drawBeacons(knownBeacons);
+        }
     }
 
     public static Region getCustomRegion() {
@@ -132,6 +194,10 @@ public class BaseMainActivity extends AppCompatActivity implements BeaconConsume
         beaconsInfo.add(new BeaconInfo(foundBeacon.getId1().toHexString(),
                 foundBeacon.getId2().toHexString(), foundBeacon.getBluetoothAddress(),
                 foundBeacon.getRssi(), foundBeacon.getDistance(), true));
+    }
+
+    protected void getRoomOfBeacon(Beacon foundBeacon) {
+
     }
 
     protected void getBeaconsOfRoom(String roomKey) {

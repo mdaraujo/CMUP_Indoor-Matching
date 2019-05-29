@@ -24,8 +24,6 @@ import com.mdaraujo.commonlibrary.model.BeaconInfo;
 import com.mdaraujo.commonlibrary.model.Room;
 
 import org.altbeacon.beacon.Beacon;
-import org.altbeacon.beacon.RangeNotifier;
-import org.altbeacon.beacon.Region;
 import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
@@ -34,14 +32,11 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 import static com.mdaraujo.commonlibrary.model.BeaconInfo.BEACONS_COLLECTION_NAME;
 import static com.mdaraujo.commonlibrary.model.Room.ROOMS_COLLECTION_NAME;
 
-public class MainActivity extends BaseMainActivity implements RangeNotifier {
+public class MainActivity extends BaseMainActivity {
 
     private static String TAG = "MainActivity";
 
@@ -110,54 +105,7 @@ public class MainActivity extends BaseMainActivity implements RangeNotifier {
     }
 
     @Override
-    public void onBeaconServiceConnect() {
-        super.onBeaconServiceConnect();
-        mBeaconManager.addRangeNotifier(this);
-    }
-
-    @Override
-    public void didRangeBeaconsInRegion(Collection<Beacon> foundBeacons, Region region) {
-
-        for (BeaconInfo beacon : beaconsInfo) {
-            beacon.setInRange(false);
-        }
-
-        if (foundBeacons.size() <= 0) {
-            return;
-        }
-
-        for (Beacon foundBeacon : foundBeacons) {
-            if (foundBeacon.getServiceUuid() == 0xfeaa && foundBeacon.getBeaconTypeCode() == 0x00) {
-                // This is a Eddystone-UID frame
-
-                BeaconInfo beaconInfo = getBeaconFromList(foundBeacon.getId2().toHexString());
-
-                if (beaconInfo == null) {
-
-                    if (room == null) {
-                        getRoomOfBeacon(foundBeacon);
-                    } else {
-                        addFoundBeaconToList(foundBeacon);
-                    }
-
-                } else {
-                    beaconInfo.setDistance(foundBeacon.getDistance());
-                    beaconInfo.setRssi(foundBeacon.getRssi());
-                    beaconInfo.setInRange(true);
-                }
-            }
-        }
-
-        List<BeaconInfo> beaconsToDraw = new ArrayList<>();
-
-        for (BeaconInfo beaconInfo : beaconsInfo)
-            if (beaconInfo.getRoomKey() != null)
-                beaconsToDraw.add(beaconInfo);
-
-        roomCanvas.drawBeacons(beaconsToDraw);
-    }
-
-    private void getRoomOfBeacon(Beacon foundBeacon) {
+    protected void getRoomOfBeacon(Beacon foundBeacon) {
         String instanceId = foundBeacon.getId2().toHexString();
 
         // do query on beacon MAC address

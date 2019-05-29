@@ -1,6 +1,8 @@
 package com.mdaraujo.indoorconfig;
 
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.PointF;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -29,20 +31,18 @@ import com.mdaraujo.commonlibrary.model.BeaconInfo;
 import com.mdaraujo.commonlibrary.model.Room;
 
 import org.altbeacon.beacon.Beacon;
-import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 import static com.mdaraujo.commonlibrary.model.BeaconInfo.BEACONS_COLLECTION_NAME;
 import static com.mdaraujo.commonlibrary.model.Room.ROOMS_COLLECTION_NAME;
 
-public class MainActivity extends BaseMainActivity implements RangeNotifier, RecyclerViewClickListener {
+public class MainActivity extends BaseMainActivity implements RecyclerViewClickListener {
 
     private static String TAG = "MainActivity";
+
+    public static final int ROOM_REQUEST_CODE = 1;
 
     private String roomKey;
 
@@ -52,8 +52,6 @@ public class MainActivity extends BaseMainActivity implements RangeNotifier, Rec
     private TextView roomNameView;
     private Button roomAddBtn;
     private Button roomEditBtn;
-
-    public static final int ROOM_REQUEST_CODE = 1;
 
 
     @Override
@@ -94,54 +92,9 @@ public class MainActivity extends BaseMainActivity implements RangeNotifier, Rec
     }
 
     @Override
-    public void onBeaconServiceConnect() {
-        super.onBeaconServiceConnect();
-        mBeaconManager.addRangeNotifier(this);
-    }
-
-    @Override
     public void didRangeBeaconsInRegion(Collection<Beacon> foundBeacons, Region region) {
-
-        for (BeaconInfo beacon : beaconsInfo) {
-            beacon.setInRange(false);
-        }
-
-        if (foundBeacons.size() <= 0) {
-            beaconsAdapter.notifyDataSetChanged();
-            return;
-        }
-
-        for (Beacon foundBeacon : foundBeacons) {
-            if (foundBeacon.getServiceUuid() == 0xfeaa && foundBeacon.getBeaconTypeCode() == 0x00) {
-                // This is a Eddystone-UID frame
-
-                BeaconInfo beaconInfo = getBeaconFromList(foundBeacon.getId2().toHexString());
-
-                if (beaconInfo == null) {
-
-                    if (room == null) {
-                        getRoomOfBeacon(foundBeacon);
-                    } else {
-                        addFoundBeaconToList(foundBeacon);
-                    }
-
-                } else {
-                    beaconInfo.setDistance(foundBeacon.getDistance());
-                    beaconInfo.setRssi(foundBeacon.getRssi());
-                    beaconInfo.setInRange(true);
-                }
-            }
-        }
-        Collections.sort(beaconsInfo, (o1, o2) -> o1.getInstanceId().compareTo(o2.getInstanceId()));
+        super.didRangeBeaconsInRegion(foundBeacons, region);
         beaconsAdapter.notifyDataSetChanged();
-
-        List<BeaconInfo> beaconsToDraw = new ArrayList<>();
-
-        for (BeaconInfo beaconInfo : beaconsInfo)
-            if (beaconInfo.getRoomKey() != null)
-                beaconsToDraw.add(beaconInfo);
-
-        roomCanvas.drawBeacons(beaconsToDraw);
     }
 
     @Override
@@ -161,7 +114,8 @@ public class MainActivity extends BaseMainActivity implements RangeNotifier, Rec
         startActivity(beaconConfigIntent);
     }
 
-    private void getRoomOfBeacon(Beacon foundBeacon) {
+    @Override
+    protected void getRoomOfBeacon(Beacon foundBeacon) {
         String instanceId = foundBeacon.getId2().toHexString();
 
         Query queryBeacon = firestoreDb.collection(BEACONS_COLLECTION_NAME)

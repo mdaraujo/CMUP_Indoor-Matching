@@ -4,16 +4,13 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.PointF;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 
 import com.mdaraujo.commonlibrary.model.BeaconInfo;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class RoomCanvasView extends View {
 
@@ -23,16 +20,8 @@ public class RoomCanvasView extends View {
     private static final int marginX = radius + 5;
     private static final int marginY = radius + 5;
 
-    private static final int nRandomGuesses = 50;
-    private static final int nInformedGuesses = 150;
-    private static final float informedRange = 1.5f;
-    private static final float maxInfluence = 0.1f;
-    private static final float minInfluence = 0.03f;
-
     private Paint mPaint;
     private List<BeaconInfo> beaconCircles;
-    private PointF avgPosition;
-    private double avgConfidence;
 
     public RoomCanvasView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -42,8 +31,6 @@ public class RoomCanvasView extends View {
     }
 
     public void reset() {
-        avgPosition = null;
-        avgConfidence = 0;
         beaconCircles.clear();
         invalidate();
     }
@@ -102,96 +89,6 @@ public class RoomCanvasView extends View {
         if (beaconsInfo.get(lastPos).getPosY() < minY)
             minY = beaconsInfo.get(lastPos).getPosY();
 
-
-        // get only the beacons with distance info
-        List<BeaconInfo> beaconsWithDistance = new ArrayList<>();
-
-        for (BeaconInfo beaconInfo : beaconsInfo)
-            if (beaconInfo.getDistance() != null)
-                beaconsWithDistance.add(beaconInfo);
-
-        // estimate phone position by generating guesses and calculating their probability
-        if (!beaconsWithDistance.isEmpty()) {
-
-            List<PointF> guess = new ArrayList<>();
-            Random random = new Random();
-            float hx;
-            float hy;
-
-            // generate guesses
-            for (int i = 0; i < nRandomGuesses + nInformedGuesses; i++) {
-
-                if (i < nRandomGuesses || avgPosition == null) {
-                    hx = minX + random.nextFloat() * (maxBeaconX - minX);
-                    hy = minY + random.nextFloat() * (maxBeaconY - minY);
-                } else {
-                    // informed guesses variate in 1.5m from last guess
-                    hx = avgPosition.x - informedRange + random.nextFloat() * (avgPosition.x + 2 * informedRange);
-                    hy = avgPosition.y - informedRange + random.nextFloat() * (avgPosition.y + 2 * informedRange);
-                }
-                guess.add(new PointF(hx, hy));
-            }
-
-            if (avgPosition != null) {
-                guess.add(avgPosition);
-            }
-
-            // calculate guess probability and take best
-            PointF bestGuess = new PointF();
-            double maxProb = 0;
-            double prob;
-
-            for (int i = 0; i < guess.size(); i++) {
-                prob = 1;
-                hx = guess.get(i).x;
-                hy = guess.get(i).y;
-
-                for (BeaconInfo beacon : beaconsWithDistance) {
-                    double hDist = Math.sqrt(Math.pow(beacon.getPosX() - hx, 2) + Math.pow(beacon.getPosY() - hy, 2));
-                    prob *= (1 / (10 * Math.pow(1 - (hDist / beacon.getDistance()), 2) + 1));
-//                    Log.d(TAG, String.format("HDist: %f, Beacon Dist: %f", hDist, beacon.getDistance()));
-//                    Log.d(TAG, String.format("Prob Intern: %f", 1 / (10 * Math.pow(1 - (hDist / beacon.getDistance()), 2) + 1)));
-                }
-
-//                Log.d(TAG, String.format("Prob: %f, X: %f, Y: %f", prob, hx, hy));
-                if (prob > maxProb) {
-                    maxProb = prob;
-                    bestGuess.set(hx, hy);
-                }
-            }
-
-            avgConfidence = (1 - maxProb) * avgConfidence + maxProb * maxProb;
-
-            double factor;
-
-            if (maxProb > avgConfidence)
-                factor = maxInfluence;
-            else
-                factor = (avgConfidence - maxProb) / avgConfidence * minInfluence + (maxProb / avgConfidence) * maxInfluence;
-
-
-            float factorF = (float) factor;
-//            float factor = (float) (1 - maxProb) * minInfluence + (float) maxProb * maxInfluence;
-
-            if (avgPosition != null) {
-                avgPosition.x = (1 - factorF) * avgPosition.x + factorF * bestGuess.x;
-                avgPosition.y = (1 - factorF) * avgPosition.y + factorF * bestGuess.y;
-            } else {
-                avgPosition = bestGuess;
-            }
-//            avgPosition = bestGuess;
-
-//            Log.i(TAG, String.format("Max Prob: %f, Better Guess: X: %f, Y: %f", maxProb, avgPosition.x, avgPosition.y));
-
-            Log.i(TAG, String.format("Average Conf: %f, Max prob: %f, Factor: %f", avgConfidence, maxProb, factor));
-
-            beaconsInfo.add(new BeaconInfo("Phone", Color.BLACK, avgPosition.x, avgPosition.y));
-            beaconsInfo.add(new BeaconInfo("best guess", Color.GRAY, bestGuess.x, bestGuess.y));
-        }
-
-        // TODO maybe change borders coordinates to include phone position
-
-        // draw all beacons + phone estimation
         int canvasWidth = getWidth() - 2 * marginX;
         int canvasHeight = getHeight() - 2 * marginY;
 
