@@ -23,20 +23,29 @@ public class RoomCanvasView extends View {
     private static final int marginX = radius + 5;
     private static final int marginY = radius + 5;
 
-    private static final int nRandomGuesses = 10;
-    private static final int nInformedGuesses = 100;
+    private static final int nRandomGuesses = 50;
+    private static final int nInformedGuesses = 150;
     private static final float informedRange = 1.5f;
-    private static final float moveFactor = 0.1f;
+    private static final float maxInfluence = 0.1f;
+    private static final float minInfluence = 0.03f;
 
     private Paint mPaint;
     private List<BeaconInfo> beaconCircles;
     private PointF avgPosition;
+    private double avgConfidence;
 
     public RoomCanvasView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mPaint = new Paint();
         beaconCircles = new ArrayList<>();
+        reset();
+    }
+
+    public void reset() {
         avgPosition = null;
+        avgConfidence = 0;
+        beaconCircles.clear();
+        invalidate();
     }
 
     @Override
@@ -117,10 +126,8 @@ public class RoomCanvasView extends View {
                     hy = minY + random.nextFloat() * (maxBeaconY - minY);
                 } else {
                     // informed guesses variate in 1.5m from last guess
-                    float infMinX = Math.max(minX, avgPosition.x - informedRange);
-                    hx = infMinX + random.nextFloat() * (avgPosition.x + 2 * informedRange);
-                    float infMinY = Math.max(minY, avgPosition.y - informedRange);
-                    hy = infMinY + random.nextFloat() * (avgPosition.y + 2 * informedRange);
+                    hx = avgPosition.x - informedRange + random.nextFloat() * (avgPosition.x + 2 * informedRange);
+                    hy = avgPosition.y - informedRange + random.nextFloat() * (avgPosition.y + 2 * informedRange);
                 }
                 guess.add(new PointF(hx, hy));
             }
@@ -153,16 +160,33 @@ public class RoomCanvasView extends View {
                 }
             }
 
+            avgConfidence = (1 - maxProb) * avgConfidence + maxProb * maxProb;
+
+            double factor;
+
+            if (maxProb > avgConfidence)
+                factor = maxInfluence;
+            else
+                factor = (avgConfidence - maxProb) / avgConfidence * minInfluence + (maxProb / avgConfidence) * maxInfluence;
+
+
+            float factorF = (float) factor;
+//            float factor = (float) (1 - maxProb) * minInfluence + (float) maxProb * maxInfluence;
+
             if (avgPosition != null) {
-                avgPosition.x = (1 - moveFactor) * avgPosition.x + moveFactor * bestGuess.x;
-                avgPosition.y = (1 - moveFactor) * avgPosition.y + moveFactor * bestGuess.y;
+                avgPosition.x = (1 - factorF) * avgPosition.x + factorF * bestGuess.x;
+                avgPosition.y = (1 - factorF) * avgPosition.y + factorF * bestGuess.y;
             } else {
                 avgPosition = bestGuess;
             }
+//            avgPosition = bestGuess;
 
-//            Log.d(TAG, String.format("Max Prob: %f, Better Guess: X: %f, Y: %f", maxProb, avgPosition.x, avgPosition.y));
+//            Log.i(TAG, String.format("Max Prob: %f, Better Guess: X: %f, Y: %f", maxProb, avgPosition.x, avgPosition.y));
+
+            Log.i(TAG, String.format("Average Conf: %f, Max prob: %f, Factor: %f", avgConfidence, maxProb, factor));
 
             beaconsInfo.add(new BeaconInfo("Phone", Color.BLACK, avgPosition.x, avgPosition.y));
+            beaconsInfo.add(new BeaconInfo("best guess", Color.GRAY, bestGuess.x, bestGuess.y));
         }
 
         // TODO maybe change borders coordinates to include phone position

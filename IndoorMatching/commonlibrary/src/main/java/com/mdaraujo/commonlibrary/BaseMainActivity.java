@@ -71,10 +71,10 @@ public class BaseMainActivity extends AppCompatActivity implements BeaconConsume
         firestoreDb = FirebaseFirestore.getInstance();
 
 //        BeaconManager.setRssiFilterImplClass(RunningAverageRssiFilter.class);
-//        RunningAverageRssiFilter.setSampleExpirationMilliseconds(3000L);
+//        RunningAverageRssiFilter.setSampleExpirationMilliseconds(100L);
 
         BeaconManager.setRssiFilterImplClass(ArmaRssiFilter.class);
-//        ArmaRssiFilter.setDEFAULT_ARMA_SPEED(0.1);
+        ArmaRssiFilter.setDEFAULT_ARMA_SPEED(0.4);
 
         mBeaconManager = BeaconManager.getInstanceForApplication(this.getApplicationContext());
         mBeaconManager.getBeaconParsers().add(new BeaconParser().
@@ -92,8 +92,7 @@ public class BaseMainActivity extends AppCompatActivity implements BeaconConsume
     protected void refreshScan() {
         room = null;
         beaconsInfo = new ArrayList<>();
-
-        // reset object that estimates phone position
+        roomCanvas.reset();
 
         mBeaconManager.setForegroundScanPeriod(400L);
         mBeaconManager.setForegroundBetweenScanPeriod(0L); // duration spent not scanning between each Bluetooth scan cycle
