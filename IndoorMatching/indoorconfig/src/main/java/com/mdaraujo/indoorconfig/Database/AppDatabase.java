@@ -114,6 +114,10 @@ public abstract class AppDatabase extends RoomDatabase {
             item = new Item(12121212, "Cristiano Ronaldo", 4);
             itemDAO.insert(item);
 
+            Interest interest;
+            interest = new Interest("4Flkz73gqNZxBb1XBkHK1Jy8meV2", 2);
+            interestDAO.insert(interest);
+
             return null;
         }
     }

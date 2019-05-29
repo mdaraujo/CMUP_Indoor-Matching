@@ -18,8 +18,11 @@ public class ItemViewModel extends AndroidViewModel {
         appRepository = new AppRepository(application);
     }
 
-    public LiveData<List<String>> getItemsFromCategory(int categoryId) {
+    public LiveData<List<Item>> getItemsFromCategory(int categoryId) {
         return appRepository.getItemsFromCategory(categoryId);
     }
 
+    public LiveData<List<Item>> getAllItems() {
+        return appRepository.getAllItems();
+    }
 }

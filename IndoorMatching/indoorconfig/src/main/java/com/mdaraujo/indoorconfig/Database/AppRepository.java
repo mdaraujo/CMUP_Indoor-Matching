@@ -2,6 +2,8 @@ package com.mdaraujo.indoorconfig.Database;
 
 import android.app.Application;
 import android.arch.lifecycle.LiveData;
+import android.os.AsyncTask;
+import android.util.Log;
 
 import com.mdaraujo.indoorconfig.Database.Category.Category;
 import com.mdaraujo.indoorconfig.Database.Category.CategoryDAO;
@@ -41,11 +43,14 @@ public class AppRepository {
 
     public void insert(Category category) {
         categoryDAO.insert(category);
-//        new insertAsyncTask(categoryDAO).execute(category);
     }
 
     //ITEM
-    public LiveData<List<String>> getItemsFromCategory(int categoryId) {
+    public LiveData<List<Item>> getAllItems() {
+        return itemDAO.getAllItems();
+    }
+
+    public LiveData<List<Item>> getItemsFromCategory(int categoryId) {
         return itemDAO.getItemsFromCategory(categoryId);
     }
 
@@ -58,28 +63,61 @@ public class AppRepository {
         return interestDAO.getInterestsFromCategory(userId, categoryId);
     }
 
-    public void insert(Interest interest) {
-        interestDAO.insert(interest);
+    public void updateInterests(List<Item> items, String userId, List<Integer> interests) {
+        new updateAsyncTask(interestDAO, items, userId, interests).execute();
     }
 
-//    private static class insertAsyncTask extends AsyncTask<Category, Void, Void> {
-//
-//        private CategoryDAO categoryDAO;
-//        private ItemDAO itemDAO;
-//
-//        insertAsyncTask(CategoryDAO dao) {
-//            categoryDAO = dao;
-//        }
-//
-//        insertAsyncTask(ItemDAO dao) {
-//            itemDAO = dao;
-//        }
-//
-//        @Override
-//        protected Void doInBackground(final Category... params) {
-//            categoryDAO.insert(params[0]);
-//            return null;
-//        }
-//    }
+    public void delete(String userId, int itemId) {
+        interestDAO.delete(userId, itemId);
+    }
+
+    public boolean checkIfExists(String userId, int itemId) {
+        return interestDAO.countItemInterest(userId, itemId) > 0;
+    }
+
+    public void deleteAll() {
+        interestDAO.deleteAll();
+    }
+
+    public LiveData<List<Integer>> getUserInterests(String userId) {
+        return interestDAO.getUserInterests(userId);
+    }
+
+
+    private static class updateAsyncTask extends AsyncTask<Void, Void, Void> {
+
+        private InterestDAO interestDAO;
+        private List<Item> items;
+        private String userId;
+        private List<Integer> interests;
+
+        public updateAsyncTask(InterestDAO interestDAO, List<Item> items, String userId, List<Integer> interests) {
+            this.interestDAO = interestDAO;
+            this.items = items;
+            this.userId = userId;
+            this.interests = interests;
+        }
+
+        @Override
+        protected Void doInBackground(final Void... params) {
+
+            for (Item item : items) {
+                boolean itemExists = interestDAO.countItemInterest(userId, item.getItemId()) > 0;
+                Log.d("DB_DEBUG", "ID: " + item.getItemId() + " EXISTS: " + itemExists);
+                if (interests.contains(item.getItemId())) {
+                    if (!itemExists) {
+                        interestDAO.insert(new Interest(userId, item.getItemId()));
+                    }
+                } else {
+                    if (itemExists) {
+                        interestDAO.delete(userId, item.getItemId());
+                    }
+                }
+            }
+
+            return null;
+        }
+
+    }
 
 }

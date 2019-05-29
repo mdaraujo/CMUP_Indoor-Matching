@@ -18,8 +18,8 @@ public interface ItemDAO {
     @Query("SELECT * from items ORDER BY item_id ASC")
     LiveData<List<Item>> getAllItems();
 
-    @Query("SELECT item_name FROM items WHERE category_id_ref = :categoryId ORDER BY item_name ASC")
-    LiveData<List<String>> getItemsFromCategory(int categoryId);
+    @Query("SELECT * FROM items WHERE category_id_ref = :categoryId ORDER BY item_name ASC")
+    LiveData<List<Item>> getItemsFromCategory(int categoryId);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insert(Item item);

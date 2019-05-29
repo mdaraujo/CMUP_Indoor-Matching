@@ -52,4 +52,13 @@ public class Item {
     public void setCategoryIdRef(int categoryIdRef) {
         this.categoryIdRef = categoryIdRef;
     }
+
+    @Override
+    public String toString() {
+        return "Item{" +
+                "itemId=" + itemId +
+                ", itemName='" + itemName + '\'' +
+                ", categoryIdRef=" + categoryIdRef +
+                '}';
+    }
 }
