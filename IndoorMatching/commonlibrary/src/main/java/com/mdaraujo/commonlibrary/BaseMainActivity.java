@@ -5,14 +5,20 @@ import android.app.AlertDialog;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.PointF;
+import android.net.Uri;
 import android.os.Build;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
@@ -46,6 +52,7 @@ public class BaseMainActivity extends AppCompatActivity implements BeaconConsume
     private BackgroundPowerSaver backgroundPowerSaver;
     protected BeaconManager mBeaconManager;
     protected FirebaseFirestore firestoreDb;
+    protected FirebaseUser user;
 
     protected RoomCanvasView roomCanvas;
     protected Room room;
@@ -56,6 +63,10 @@ public class BaseMainActivity extends AppCompatActivity implements BeaconConsume
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null)
+            return;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             // Android M Permission check
@@ -233,6 +244,17 @@ public class BaseMainActivity extends AppCompatActivity implements BeaconConsume
                         }
                     }
                 });
+    }
+
+    protected void fillBaseLayout() {
+        if (user != null) {
+            TextView displayName = findViewById(R.id.user_name_text);
+            ImageView displayImage = findViewById(R.id.user_photo);
+            String name = user.getDisplayName();
+            Uri photoUrl = user.getPhotoUrl();
+            Glide.with(this).load(photoUrl + "?type=large").centerCrop().into(displayImage);
+            displayName.setText(name);
+        }
     }
 
 

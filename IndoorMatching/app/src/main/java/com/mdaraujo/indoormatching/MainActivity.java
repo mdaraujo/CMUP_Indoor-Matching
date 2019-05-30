@@ -1,20 +1,16 @@
 package com.mdaraujo.indoormatching;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
 import com.facebook.login.LoginManager;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.Query;
@@ -49,18 +45,12 @@ public class MainActivity extends BaseMainActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null) {
-            TextView displayName = findViewById(R.id.user_name_text);
-            ImageView displayImage = findViewById(R.id.user_photo);
-            String name = user.getDisplayName();
-            Uri photoUrl = user.getPhotoUrl();
-            Glide.with(this).load(photoUrl + "?type=large").centerCrop().into(displayImage);
-            displayName.setText(name);
-        } else {
+        if (user == null) {
             startActivity(new Intent(this, LoginActivity.class));
             finish();
         }
+
+        fillBaseLayout();
 
         roomNameView = findViewById(R.id.room_name_text);
         roomCanvas = findViewById(R.id.room_canvas);
