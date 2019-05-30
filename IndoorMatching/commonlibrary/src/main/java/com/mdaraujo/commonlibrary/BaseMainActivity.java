@@ -12,6 +12,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -48,6 +49,8 @@ import static com.mdaraujo.commonlibrary.model.BeaconInfo.BEACONS_COLLECTION_NAM
 public class BaseMainActivity extends AppCompatActivity implements BeaconConsumer, RangeNotifier {
 
     private static String TAG = "BaseMainActivity";
+    private static String phoneItemName = "Phone";
+    private static int phoneItemColor = Color.BLACK;
 
     private BackgroundPowerSaver backgroundPowerSaver;
     protected BeaconManager mBeaconManager;
@@ -57,6 +60,11 @@ public class BaseMainActivity extends AppCompatActivity implements BeaconConsume
     protected RoomCanvasView roomCanvas;
     protected Room room;
     protected List<BeaconInfo> beaconsInfo;
+
+
+    protected ImageView phoneItemColorView;
+    protected TextView phoneItemNameView;
+    protected TextView phoneItemCoordsView;
 
     private PositionEstimation positionEstimation;
 
@@ -181,7 +189,8 @@ public class BaseMainActivity extends AppCompatActivity implements BeaconConsume
 
             if (estimation != null) {
                 knownBeacons.add(new BeaconInfo("Best Guess", Color.GRAY, bestGuess.x, bestGuess.y));
-                knownBeacons.add(new BeaconInfo("Phone", Color.BLACK, estimation.x, estimation.y));
+                knownBeacons.add(new BeaconInfo(phoneItemName, phoneItemColor, estimation.x, estimation.y));
+                phoneItemCoordsView.setText(positionEstimation.getStatusString());
             }
 
             roomCanvas.drawBeacons(knownBeacons);
@@ -254,6 +263,14 @@ public class BaseMainActivity extends AppCompatActivity implements BeaconConsume
             Uri photoUrl = user.getPhotoUrl();
             Glide.with(this).load(photoUrl + "?type=large").centerCrop().into(displayImage);
             displayName.setText(name);
+
+            View phoneView = findViewById(R.id.phone_item);
+            phoneItemColorView = phoneView.findViewById(R.id.beacon_color);
+            phoneItemNameView = phoneView.findViewById(R.id.beacon_name);
+            phoneItemCoordsView = phoneView.findViewById(R.id.beacon_coords);
+
+            phoneItemColorView.setColorFilter(phoneItemColor);
+            phoneItemNameView.setText(phoneItemName);
         }
     }
 

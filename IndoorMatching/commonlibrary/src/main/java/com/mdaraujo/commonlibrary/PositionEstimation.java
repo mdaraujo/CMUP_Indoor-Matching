@@ -1,5 +1,6 @@
 package com.mdaraujo.commonlibrary;
 
+import android.annotation.SuppressLint;
 import android.graphics.PointF;
 import android.util.Log;
 
@@ -21,7 +22,10 @@ public class PositionEstimation {
 
     private PointF avgPosition;
     private double avgConfidence;
+
     private PointF bestGuess;
+    private double maxProb;
+    private double factor;
 
     public PositionEstimation() {
         reset();
@@ -104,7 +108,7 @@ public class PositionEstimation {
 
         // calculate guess probability and take best
         bestGuess = new PointF();
-        double maxProb = 0;
+        maxProb = 0;
         double prob;
 
         for (int i = 0; i < guess.size(); i++) {
@@ -131,8 +135,6 @@ public class PositionEstimation {
 
 //            float factor = (float) (1 - maxProb) * minInfluence + (float) maxProb * maxInfluence;
 
-        double factor = -1;
-
         if (avgPosition != null) {
 
             if (maxProb > avgConfidence)
@@ -149,10 +151,7 @@ public class PositionEstimation {
             avgPosition = bestGuess;
         }
 
-//            Log.i(TAG, String.format("Max Prob: %f, Better Guess: X: %f, Y: %f", maxProb, avgPosition.x, avgPosition.y));
-
-        Log.i(TAG, String.format("Average Conf: %f, Max prob: %f, Factor: %f", avgConfidence, maxProb, factor));
-
+//        Log.i(TAG, getStatusString());
     }
 
     public PointF getEstimation() {
@@ -161,5 +160,10 @@ public class PositionEstimation {
 
     public PointF getCurrentBestGuess() {
         return bestGuess;
+    }
+
+    @SuppressLint("DefaultLocale")
+    public String getStatusString() {
+        return String.format("AVG: %.2f, Curr: %.2f; Inf: %.2f", avgConfidence, maxProb, factor);
     }
 }
