@@ -17,9 +17,9 @@ public class Interest {
 
     @NonNull
     @ColumnInfo(name = "item_id_ref")
-    private int itemIdRef;
+    private long itemIdRef;
 
-    public Interest(String userId, int itemIdRef) {
+    public Interest(String userId, long itemIdRef) {
         this.userId = userId;
         this.itemIdRef = itemIdRef;
     }
@@ -32,11 +32,19 @@ public class Interest {
         this.userId = userId;
     }
 
-    public int getItemIdRef() {
+    public long getItemIdRef() {
         return itemIdRef;
     }
 
-    public void setItemIdRef(int itemIdRef) {
+    public void setItemIdRef(long itemIdRef) {
         this.itemIdRef = itemIdRef;
+    }
+
+    @Override
+    public String toString() {
+        return "Interest{" +
+                "userId='" + userId + '\'' +
+                ", itemIdRef=" + itemIdRef +
+                '}';
     }
 }

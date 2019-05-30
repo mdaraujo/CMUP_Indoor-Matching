@@ -5,7 +5,6 @@ import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
-import android.arch.persistence.room.RoomWarnings;
 
 import java.util.List;
 
@@ -27,4 +26,6 @@ public interface ItemDAO {
     @Query("DELETE FROM items")
     void deleteAll();
 
+    @Query("SELECT COUNT(*) FROM items WHERE item_id = :itemId")
+    int countItem(long itemId);
 }

@@ -8,13 +8,18 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.mdaraujo.indoorconfig.Database.Category.Category;
 import com.mdaraujo.indoorconfig.Database.Category.CategoryAdapter;
 import com.mdaraujo.indoorconfig.Database.Category.CategoryViewModel;
+import com.mdaraujo.indoorconfig.Database.Category.FacebookData;
 import com.mdaraujo.indoorconfig.Database.Interest.InterestViewModel;
 import com.mdaraujo.indoorconfig.Database.Item.Item;
 import com.mdaraujo.indoorconfig.Database.Item.ItemViewModel;
@@ -23,12 +28,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.mdaraujo.commonlibrary.CommonParams.FACEBOOK_CATEGORY_ID;
+
 public class UserProfileActivity extends AppCompatActivity implements RecyclerViewClickListener {
 
     private final static String TAG = "UserProfileActivity";
 
     private FirebaseAuth mAuth;
     private FirebaseUser user;
+    private FacebookData facebookData;
 
     private List<Category> categoriesInfo;
     private CategoryAdapter categoryAdapter;
@@ -37,7 +45,7 @@ public class UserProfileActivity extends AppCompatActivity implements RecyclerVi
     private InterestViewModel interestViewModel;
 
     private List<Item> itemsList;
-    private List<Integer> interestList;
+    private List<Long> interestList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,10 +57,9 @@ public class UserProfileActivity extends AppCompatActivity implements RecyclerVi
 
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
+        facebookData = new FacebookData(user.getUid(), getApplication());
 
-        recyclerView = (RecyclerView)
-
-                findViewById(R.id.categories_recycler_view);
+        recyclerView = (RecyclerView) findViewById(R.id.categories_recycler_view);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -81,20 +88,44 @@ public class UserProfileActivity extends AppCompatActivity implements RecyclerVi
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_user_profile, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.fb_refresh:
+                facebookData.updateFacebookData();
+
+                Toast.makeText(this, "Database Reset", Toast.LENGTH_LONG).show();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
     }
 
     @Override
     public void recyclerViewListClicked(View v, int position) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(UserProfileActivity.this);
         Category category = categoriesInfo.get(position);
 
+        Log.d("DB_DEBUG", "ITEMS: " + itemsList);
+
         List<Item> categoryItems = new ArrayList<>();
-        for (Item item : itemsList)
+        for (Item item : itemsList) {
             if (item.getCategoryIdRef() == category.getCategoryId())
                 categoryItems.add(item);
+        }
 
-        List<Integer> categoryInterests = new ArrayList<>();
+        List<Long> categoryInterests = new ArrayList<>();
         for (Item item : categoryItems)
             if (interestList.contains(item.getItemId()))
                 categoryInterests.add(item.getItemId());
@@ -105,7 +136,7 @@ public class UserProfileActivity extends AppCompatActivity implements RecyclerVi
         //Item Names shown on category click
         for (Item item : categoryItems)
             itemNames.add(item.getItemName());
-        Log.d("DB_DEBUG", "ALL ITEMS: " + String.valueOf(categoryItems));
+        Log.d("DB_DEBUG", "CATEGORY ITEMS: " + String.valueOf(categoryItems));
 
         //User item interest fetched on category click
         for (int i = 0; i < categoryItems.size(); i++) {
@@ -116,31 +147,39 @@ public class UserProfileActivity extends AppCompatActivity implements RecyclerVi
         }
         Log.d("DB_DEBUG", "INTERESTS " + String.valueOf(categoryInterests) + " SELECTED " + Arrays.toString(selectedItems));
 
+        if (category.getCategoryId() == FACEBOOK_CATEGORY_ID) {
+            builder.setTitle(category.getCategoryName());
+            builder.setItems(itemNames.toArray(new String[itemNames.size()]), (dialog, which) -> {
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(UserProfileActivity.this);
-        builder.setTitle(category.getCategoryName());
-        builder.setMultiChoiceItems(itemNames.toArray(new String[itemNames.size()]), selectedItems, (dialog, which, isChecked) -> {
-            int itemId = categoryItems.get(which).getItemId();
-            if (isChecked) {
-                categoryInterests.add(itemId);
-            } else if (categoryInterests.contains(itemId)) {
-                categoryInterests.remove(categoryInterests.indexOf(itemId));
-            }
-            Log.d("DB_DEBUG", String.valueOf(categoryInterests));
-        });
+            });
+            builder.setPositiveButton(android.R.string.ok, (dialog, id) -> {
+            });
+        } else {
+
+            builder.setTitle(category.getCategoryName());
+            builder.setMultiChoiceItems(itemNames.toArray(new String[itemNames.size()]), selectedItems, (dialog, which, isChecked) -> {
+                long itemId = categoryItems.get(which).getItemId();
+                if (isChecked) {
+                    categoryInterests.add(itemId);
+                } else if (categoryInterests.contains(itemId)) {
+                    categoryInterests.remove(categoryInterests.indexOf(itemId));
+                }
+                Log.d("DB_DEBUG", String.valueOf(categoryInterests));
+            });
 
 
-        builder.setPositiveButton(android.R.string.ok, (dialog, id) -> {
-            Log.d("DB_DEBUG", "OK " + String.valueOf(categoryInterests));
-            interestViewModel.updateInterests(categoryItems, user.getUid(), categoryInterests);
-        });
+            builder.setPositiveButton(android.R.string.ok, (dialog, id) -> {
+                Log.d("DB_DEBUG", "OK " + String.valueOf(categoryInterests));
+                interestViewModel.updateInterests(categoryItems, user.getUid(), categoryInterests);
+            });
 
-        builder.setNegativeButton(android.R.string.cancel, (dialog, id) -> {
-        });
+            builder.setNegativeButton(android.R.string.cancel, (dialog, id) -> {
+            });
+
+        }
 
         AlertDialog dialog = builder.create();
         dialog.show();
-
 
     }
 }

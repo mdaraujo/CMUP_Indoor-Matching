@@ -15,7 +15,7 @@ public class Item {
     @PrimaryKey
     @NonNull
     @ColumnInfo(name = "item_id")
-    private int itemId;
+    private long itemId;
 
     @ColumnInfo(name = "item_name")
     private String itemName;
@@ -23,13 +23,13 @@ public class Item {
     @ColumnInfo(name = "category_id_ref")
     private int categoryIdRef;
 
-    public Item(int itemId, String itemName, int categoryIdRef) {
+    public Item(long itemId, String itemName, int categoryIdRef) {
         this.itemId = itemId;
         this.itemName = itemName;
         this.categoryIdRef = categoryIdRef;
     }
 
-    public int getItemId() {
+    public long getItemId() {
         return itemId;
     }
 
@@ -41,7 +41,7 @@ public class Item {
         return categoryIdRef;
     }
 
-    public void setItemId(int itemId) {
+    public void setItemId(long itemId) {
         this.itemId = itemId;
     }
 

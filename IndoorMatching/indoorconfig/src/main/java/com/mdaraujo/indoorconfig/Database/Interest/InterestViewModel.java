@@ -19,19 +19,19 @@ public class InterestViewModel extends AndroidViewModel {
         appRepository = new AppRepository(application);
     }
 
-    public LiveData<List<Integer>> getInterestsFromCategory(String userId, int categoryId) {
+    public LiveData<List<Long>> getInterestsFromCategory(String userId, int categoryId) {
         return appRepository.getInterestsFromCategory(userId, categoryId);
     }
 
-    public void delete(String userId, int itemId) {
+    public void delete(String userId, long itemId) {
         appRepository.delete(userId, itemId);
     }
 
-    public void updateInterests(List<Item> items, String userId, List<Integer> interests) {
+    public void updateInterests(List<Item> items, String userId, List<Long> interests) {
         appRepository.updateInterests(items, userId, interests);
     }
 
-    public boolean checkIfExists(String userId, int itemId) {
+    public boolean checkIfExists(String userId, long itemId) {
         return appRepository.checkIfExists(userId, itemId);
     }
 
@@ -39,7 +39,7 @@ public class InterestViewModel extends AndroidViewModel {
         appRepository.deleteAll();
     }
 
-    public LiveData<List<Integer>> getUserInterests(String userId) {
+    public LiveData<List<Long>> getUserInterests(String userId) {
         return appRepository.getUserInterests(userId);
     }
 }
