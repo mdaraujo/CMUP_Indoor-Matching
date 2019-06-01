@@ -1,4 +1,4 @@
-package com.mdaraujo.indoorconfig.Database.Item;
+package com.mdaraujo.indoormatching.Database.Item;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.persistence.room.Dao;

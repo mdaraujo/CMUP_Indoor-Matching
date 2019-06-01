@@ -1,4 +1,4 @@
-package com.mdaraujo.indoorconfig.Database.Category;
+package com.mdaraujo.indoormatching.Database.Category;
 
 import android.app.Application;
 import android.os.Bundle;
@@ -6,8 +6,8 @@ import android.os.Bundle;
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
-import com.mdaraujo.indoorconfig.Database.AppRepository;
-import com.mdaraujo.indoorconfig.Database.Item.Item;
+import com.mdaraujo.indoormatching.Database.AppRepository;
+import com.mdaraujo.indoormatching.Database.Item.Item;
 
 import org.json.JSONArray;
 import org.json.JSONObject;

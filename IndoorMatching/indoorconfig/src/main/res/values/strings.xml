@@ -2,7 +2,4 @@
     <string name="app_name">IndoorConfig</string>
     <string name="title_activity_beacon_config">Beacon Configuration</string>
     <string name="title_activity_room_config">Room Configuration</string>
-    <string name="title_activity_user_profile">My Profile</string>
-    <string name="action_settings">Refresh FB DB</string>
-    <string name="user_preferences_dialog_message">User Preferences</string>
 </resources>

@@ -22,6 +22,7 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.mdaraujo.indoormatching.Database.Category.FacebookData;
 
 import org.json.JSONException;
 
@@ -108,6 +109,9 @@ public class LoginActivity extends AppCompatActivity {
             // FirebaseUser.getIdToken() instead.
             String uid = user.getUid();
             uidTextView.setText(uid);
+
+            FacebookData facebookData = new FacebookData(user.getUid(), getApplication());
+            facebookData.updateFacebookData();
 
             startActivity(new Intent(this, MainActivity.class));
             finish();

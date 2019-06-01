@@ -1,10 +1,10 @@
-package com.mdaraujo.indoorconfig.Database.Category;
+package com.mdaraujo.indoormatching.Database.Category;
 
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
 
-import com.mdaraujo.indoorconfig.Database.AppRepository;
+import com.mdaraujo.indoormatching.Database.AppRepository;
 
 import java.util.List;
 

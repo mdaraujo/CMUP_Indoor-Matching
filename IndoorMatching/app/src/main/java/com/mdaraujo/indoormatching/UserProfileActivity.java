@@ -1,4 +1,4 @@
-package com.mdaraujo.indoorconfig;
+package com.mdaraujo.indoormatching;
 
 import android.app.AlertDialog;
 import android.arch.lifecycle.ViewModelProviders;
@@ -16,13 +16,14 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.mdaraujo.indoorconfig.Database.Category.Category;
-import com.mdaraujo.indoorconfig.Database.Category.CategoryAdapter;
-import com.mdaraujo.indoorconfig.Database.Category.CategoryViewModel;
-import com.mdaraujo.indoorconfig.Database.Category.FacebookData;
-import com.mdaraujo.indoorconfig.Database.Interest.InterestViewModel;
-import com.mdaraujo.indoorconfig.Database.Item.Item;
-import com.mdaraujo.indoorconfig.Database.Item.ItemViewModel;
+import com.mdaraujo.commonlibrary.RecyclerViewClickListener;
+import com.mdaraujo.indoormatching.Database.Category.Category;
+import com.mdaraujo.indoormatching.Database.Category.CategoryAdapter;
+import com.mdaraujo.indoormatching.Database.Category.CategoryViewModel;
+import com.mdaraujo.indoormatching.Database.Category.FacebookData;
+import com.mdaraujo.indoormatching.Database.Interest.InterestViewModel;
+import com.mdaraujo.indoormatching.Database.Item.Item;
+import com.mdaraujo.indoormatching.Database.Item.ItemViewModel;
 
 import java.util.ArrayList;
 import java.util.Arrays;

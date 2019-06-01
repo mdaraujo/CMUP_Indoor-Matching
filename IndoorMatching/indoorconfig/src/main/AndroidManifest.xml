@@ -10,15 +10,6 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".UserProfileActivity"
-            android:label="@string/title_activity_user_profile"
-            android:parentActivityName=".MainActivity"
-            android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.mdaraujo.indoorconfig.MainActivity" />
-        </activity>
-        <activity
             android:name=".RoomConfigActivity"
             android:label="@string/title_activity_room_config"
             android:parentActivityName=".MainActivity"

@@ -1,11 +1,10 @@
-package com.mdaraujo.indoorconfig.Database.Item;
+package com.mdaraujo.indoormatching.Database.Item;
 
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
-import android.util.Log;
 
-import com.mdaraujo.indoorconfig.Database.AppRepository;
+import com.mdaraujo.indoormatching.Database.AppRepository;
 
 import java.util.List;
 

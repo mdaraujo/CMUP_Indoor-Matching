@@ -1,16 +1,16 @@
-package com.mdaraujo.indoorconfig.Database;
+package com.mdaraujo.indoormatching.Database;
 
 import android.app.Application;
 import android.arch.lifecycle.LiveData;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.mdaraujo.indoorconfig.Database.Category.Category;
-import com.mdaraujo.indoorconfig.Database.Category.CategoryDAO;
-import com.mdaraujo.indoorconfig.Database.Interest.Interest;
-import com.mdaraujo.indoorconfig.Database.Interest.InterestDAO;
-import com.mdaraujo.indoorconfig.Database.Item.Item;
-import com.mdaraujo.indoorconfig.Database.Item.ItemDAO;
+import com.mdaraujo.indoormatching.Database.Category.Category;
+import com.mdaraujo.indoormatching.Database.Category.CategoryDAO;
+import com.mdaraujo.indoormatching.Database.Interest.Interest;
+import com.mdaraujo.indoormatching.Database.Interest.InterestDAO;
+import com.mdaraujo.indoormatching.Database.Item.Item;
+import com.mdaraujo.indoormatching.Database.Item.ItemDAO;
 
 import java.util.List;
 

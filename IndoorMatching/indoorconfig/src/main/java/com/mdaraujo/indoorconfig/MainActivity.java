@@ -11,7 +11,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.login.LoginManager;
@@ -22,6 +21,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.mdaraujo.commonlibrary.BaseMainActivity;
+import com.mdaraujo.commonlibrary.RecyclerViewClickListener;
 import com.mdaraujo.commonlibrary.model.BeaconInfo;
 import com.mdaraujo.commonlibrary.model.Room;
 
@@ -208,9 +208,6 @@ public class MainActivity extends BaseMainActivity implements RecyclerViewClickL
                     mBeaconManager.unbind(this);
                 }
                 refreshScan();
-                return true;
-            case R.id.user_profile:
-                startActivity(new Intent(this, UserProfileActivity.class));
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

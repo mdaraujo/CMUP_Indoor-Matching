@@ -1,4 +1,4 @@
-package com.mdaraujo.indoorconfig.Database.Item;
+package com.mdaraujo.indoormatching.Database.Item;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
@@ -7,7 +7,7 @@ import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
 import android.support.annotation.NonNull;
 
-import com.mdaraujo.indoorconfig.Database.Category.Category;
+import com.mdaraujo.indoormatching.Database.Category.Category;
 
 @Entity(tableName = "items", foreignKeys = @ForeignKey(entity = Category.class, parentColumns = "category_id", childColumns = "category_id_ref"), indices = {@Index("category_id_ref")})
 public class Item {

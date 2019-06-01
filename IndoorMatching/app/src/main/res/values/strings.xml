@@ -3,4 +3,7 @@
     <string name="match_not_found">Searching for a match</string>
     <string name="server_not_found">Server not found</string>
     <string name="server_waiting">Waiting for server</string>
+    <string name="title_activity_user_profile">My Profile</string>
+    <string name="action_settings">Refresh FB DB</string>
+    <string name="user_preferences_dialog_message">User Preferences</string>
 </resources>

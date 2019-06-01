@@ -1,4 +1,4 @@
-package com.mdaraujo.indoorconfig.Database.Interest;
+package com.mdaraujo.indoormatching.Database.Interest;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.persistence.room.Dao;

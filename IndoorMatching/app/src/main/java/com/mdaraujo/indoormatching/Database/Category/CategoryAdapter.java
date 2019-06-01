@@ -1,4 +1,4 @@
-package com.mdaraujo.indoorconfig.Database.Category;
+package com.mdaraujo.indoormatching.Database.Category;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -6,8 +6,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.mdaraujo.indoorconfig.R;
-import com.mdaraujo.indoorconfig.RecyclerViewClickListener;
+import com.mdaraujo.commonlibrary.RecyclerViewClickListener;
+import com.mdaraujo.indoormatching.R;
 
 import java.util.List;
 

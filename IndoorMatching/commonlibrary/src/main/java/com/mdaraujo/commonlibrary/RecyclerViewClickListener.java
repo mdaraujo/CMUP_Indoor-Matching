@@ -1,4 +1,4 @@
-package com.mdaraujo.indoorconfig;
+package com.mdaraujo.commonlibrary;
 
 import android.view.View;
 

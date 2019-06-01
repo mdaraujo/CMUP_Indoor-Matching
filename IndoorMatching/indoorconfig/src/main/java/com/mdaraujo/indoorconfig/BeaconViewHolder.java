@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.mdaraujo.commonlibrary.RecyclerViewClickListener;
 import com.mdaraujo.commonlibrary.model.BeaconInfo;
 
 public class BeaconViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {

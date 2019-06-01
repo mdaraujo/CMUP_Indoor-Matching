@@ -1,4 +1,4 @@
-package com.mdaraujo.indoorconfig.Database.Interest;
+package com.mdaraujo.indoormatching.Database.Interest;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
@@ -6,7 +6,7 @@ import android.arch.persistence.room.ForeignKey;
 import android.arch.persistence.room.Index;
 import android.support.annotation.NonNull;
 
-import com.mdaraujo.indoorconfig.Database.Item.Item;
+import com.mdaraujo.indoormatching.Database.Item.Item;
 
 @Entity(tableName = "interests", primaryKeys = {"user_id", "item_id_ref"}, foreignKeys = @ForeignKey(entity = Item.class, parentColumns = "item_id", childColumns = "item_id_ref"), indices = {@Index("item_id_ref")})
 public class Interest {

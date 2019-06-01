@@ -19,7 +19,6 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.gson.JsonObject;
 import com.mdaraujo.commonlibrary.BaseMainActivity;
 import com.mdaraujo.commonlibrary.model.BeaconInfo;
 import com.mdaraujo.commonlibrary.model.Room;
@@ -77,11 +76,11 @@ public class MainActivity extends BaseMainActivity {
         matchItemNameView = matchItemView.findViewById(R.id.beacon_name);
         matchItemCoordsView = matchItemView.findViewById(R.id.beacon_coords);
 
-        matchItemColorView.setColorFilter(Color.WHITE);
-        matchItemNameView.setText(R.string.server_waiting);
-
         mBeaconManager.setBackgroundScanPeriod(400L);
         mBeaconManager.setBackgroundBetweenScanPeriod(1000L);
+
+        matchItemColorView.setColorFilter(Color.WHITE);
+        matchItemNameView.setText(R.string.server_waiting);
     }
 
     private void sendMessage(String topic, String payload) {
@@ -97,7 +96,7 @@ public class MainActivity extends BaseMainActivity {
     }
 
     private void connectToMqtt() {
-        if (room == null)
+        if (room == null || client != null)
             return;
 
         String clientId = MqttClient.generateClientId();
@@ -292,6 +291,9 @@ public class MainActivity extends BaseMainActivity {
                     mBeaconManager.unbind(this);
                 }
                 refreshScan();
+                return true;
+            case R.id.user_profile:
+                startActivity(new Intent(this, UserProfileActivity.class));
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

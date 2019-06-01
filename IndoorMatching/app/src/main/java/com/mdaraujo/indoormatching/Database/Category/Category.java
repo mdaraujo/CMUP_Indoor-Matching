@@ -1,11 +1,9 @@
-package com.mdaraujo.indoorconfig.Database.Category;
+package com.mdaraujo.indoormatching.Database.Category;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
 import android.support.annotation.NonNull;
-
-import com.mdaraujo.indoorconfig.R;
 
 @Entity(tableName = "categories")
 public class Category {

@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.mdaraujo.commonlibrary.RecyclerViewClickListener;
 import com.mdaraujo.commonlibrary.model.BeaconInfo;
 
 import java.util.List;
