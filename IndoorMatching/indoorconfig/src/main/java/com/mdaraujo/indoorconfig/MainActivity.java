@@ -44,10 +44,8 @@ public class MainActivity extends BaseMainActivity implements RecyclerViewClickL
     private BeaconsAdapter beaconsAdapter;
     private RecyclerView recyclerView;
 
-    private TextView roomNameView;
     private Button roomAddBtn;
     private Button roomEditBtn;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,8 +65,6 @@ public class MainActivity extends BaseMainActivity implements RecyclerViewClickL
         roomNameView = findViewById(R.id.room_name_text);
         roomAddBtn = findViewById(R.id.room_add_btn);
         roomEditBtn = findViewById(R.id.room_edit_btn);
-
-        roomCanvas = findViewById(R.id.room_canvas);
 
     }
 

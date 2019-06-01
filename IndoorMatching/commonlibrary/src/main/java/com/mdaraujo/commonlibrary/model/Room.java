@@ -8,6 +8,7 @@ public class Room implements Serializable {
 
     private String name;
     private String serverURL;
+
     public Room() {
     }
 

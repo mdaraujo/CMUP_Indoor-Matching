@@ -52,21 +52,21 @@ public class BaseMainActivity extends AppCompatActivity implements BeaconConsume
     private static String phoneItemName = "Phone";
     private static int phoneItemColor = Color.BLACK;
 
-    private BackgroundPowerSaver backgroundPowerSaver;
+    //    private BackgroundPowerSaver backgroundPowerSaver;
     protected BeaconManager mBeaconManager;
     protected FirebaseFirestore firestoreDb;
     protected FirebaseUser user;
 
     protected RoomCanvasView roomCanvas;
+    protected TextView roomNameView;
     protected Room room;
     protected List<BeaconInfo> beaconsInfo;
-
 
     protected ImageView phoneItemColorView;
     protected TextView phoneItemNameView;
     protected TextView phoneItemCoordsView;
 
-    private PositionEstimation positionEstimation;
+    protected PositionEstimation positionEstimation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,7 +92,7 @@ public class BaseMainActivity extends AppCompatActivity implements BeaconConsume
         verifyBluetooth();
 
         // enables auto battery saving of about 60%
-        backgroundPowerSaver = new BackgroundPowerSaver(this);
+//        backgroundPowerSaver = new BackgroundPowerSaver(this);
 
         firestoreDb = FirebaseFirestore.getInstance();
 
@@ -146,6 +146,8 @@ public class BaseMainActivity extends AppCompatActivity implements BeaconConsume
 
     @Override
     public void didRangeBeaconsInRegion(Collection<Beacon> foundBeacons, Region region) {
+
+        // Log.i(TAG, String.valueOf(foundBeacons.size()));
 
         for (BeaconInfo beacon : beaconsInfo) {
             beacon.setInRange(false);
@@ -271,6 +273,9 @@ public class BaseMainActivity extends AppCompatActivity implements BeaconConsume
 
             phoneItemColorView.setColorFilter(phoneItemColor);
             phoneItemNameView.setText(phoneItemName);
+
+            roomNameView = findViewById(R.id.room_name_text);
+            roomCanvas = findViewById(R.id.room_canvas);
         }
     }
 
