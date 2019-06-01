@@ -1,9 +1,10 @@
 package com.mdaraujo.indoormatching;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.net.Uri;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -43,6 +44,13 @@ public class LoginActivity extends AppCompatActivity {
         displayImage = findViewById(R.id.image_view);
         LoginButton loginButton = findViewById(R.id.login_button);
         loginButton.setReadPermissions("email", "public_profile");
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Permission to access Facebook data");
+        builder.setMessage("This application only uses your Facebook likes data. Your data is only used to match user preferences and is not saved anywhere else than this device.");
+        builder.setPositiveButton(android.R.string.ok, null);
+        builder.setNegativeButton(android.R.string.cancel, (dialog, which) -> finish());
+        builder.show();
 
         mAuth = FirebaseAuth.getInstance();
         // Creating CallbackManager
