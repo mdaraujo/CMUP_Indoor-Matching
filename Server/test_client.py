@@ -69,7 +69,7 @@ def main():
     msg = {
         "msgType": 0,
         "userId": user_id,
-        "name": "Miguel Araújo"
+        "name": "Name of " + user_id
     }
 
     sendMsg(client, msg)

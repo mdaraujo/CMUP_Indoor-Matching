@@ -19,6 +19,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.gson.JsonObject;
 import com.mdaraujo.commonlibrary.BaseMainActivity;
 import com.mdaraujo.commonlibrary.model.BeaconInfo;
 import com.mdaraujo.commonlibrary.model.Room;
@@ -27,7 +28,9 @@ import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.Region;
 import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
+import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
@@ -45,6 +48,9 @@ public class MainActivity extends BaseMainActivity {
     private static String TAG = "MainActivity";
 
     private static String GATEWAY_TOPIC = "gateway_service";
+    private static int matchItemColor = Color.RED;
+
+    private String userTopic;
 
     private MqttAndroidClient client;
 
@@ -62,6 +68,8 @@ public class MainActivity extends BaseMainActivity {
             finish();
         }
 
+        userTopic = "users/" + user.getUid();
+
         fillBaseLayout();
 
         View matchItemView = findViewById(R.id.match_item);
@@ -74,7 +82,6 @@ public class MainActivity extends BaseMainActivity {
 
         mBeaconManager.setBackgroundScanPeriod(400L);
         mBeaconManager.setBackgroundBetweenScanPeriod(1000L);
-        
     }
 
     private void sendMessage(String topic, String payload) {
@@ -97,19 +104,62 @@ public class MainActivity extends BaseMainActivity {
         client = new MqttAndroidClient(this.getApplicationContext(), room.getServerURL(),
                 clientId);
 
+        client.setCallback(new MqttCallbackExtended() {
+            @Override
+            public void connectComplete(boolean b, String s) {
+                Log.w(TAG, s);
+            }
+
+            @Override
+            public void connectionLost(Throwable throwable) {
+
+            }
+
+            @Override
+            public void messageArrived(String topic, MqttMessage mqttMessage) throws Exception {
+                Log.w(TAG, "RECEIVED: " + mqttMessage.toString());
+
+                JSONObject msg = new JSONObject(mqttMessage.toString());
+
+                String matchName = msg.getString("name");
+                float x = (float) msg.getDouble("x");
+                float y = (float) msg.getDouble("y");
+
+                matchItemNameView.setText(matchName);
+                matchItemColorView.setColorFilter(matchItemColor);
+
+                BeaconInfo matchCircle = getBeaconFromList("match");
+
+                if (matchCircle != null) {
+                    matchCircle.setPosX(x);
+                    matchCircle.setPosY(y);
+                } else {
+                    BeaconInfo match = new BeaconInfo(matchName, matchItemColor, x, y);
+                    match.setInstanceId("match");
+                    match.setRoomKey("match");
+                    beaconsInfo.add(match);
+                }
+
+            }
+
+            @Override
+            public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
+
+            }
+        });
+
         try {
             IMqttToken token = client.connect();
             token.setActionCallback(new IMqttActionListener() {
                 @Override
                 public void onSuccess(IMqttToken asyncActionToken) {
-                    // We are connected
                     Log.d(TAG, "MqttAndroidClient: onSuccess");
+                    subscribeToTopic();
                     JSONObject userInfoMsg = new JSONObject();
                     try {
                         userInfoMsg.put("msgType", 0);
                         userInfoMsg.put("userId", user.getUid());
                         userInfoMsg.put("name", user.getDisplayName());
-                        
 
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -127,6 +177,26 @@ public class MainActivity extends BaseMainActivity {
             });
         } catch (MqttException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void subscribeToTopic() {
+        try {
+            client.subscribe(userTopic, 0, null, new IMqttActionListener() {
+                @Override
+                public void onSuccess(IMqttToken asyncActionToken) {
+                    Log.w(TAG, "Subscribed!");
+                }
+
+                @Override
+                public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
+                    Log.w(TAG, "Subscribed fail!");
+                }
+            });
+
+        } catch (MqttException ex) {
+            Log.w(TAG, "Exception while subscribing");
+            ex.printStackTrace();
         }
     }
 
