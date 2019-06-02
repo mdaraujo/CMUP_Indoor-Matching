@@ -1,7 +1,13 @@
 package com.mdaraujo.indoormatching;
 
 import android.app.Application;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Intent;
+import android.os.Build;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 
 import com.mdaraujo.commonlibrary.BaseMainActivity;
@@ -53,7 +59,30 @@ public class IndoorMatching extends Application implements BootstrapNotifier {
         // IMPORTANT: in the AndroidManifest.xml definition of this activity, you must set android:launchMode="singleInstance" or you will get two instances
         // created when a user launches the activity manually and it gets launched from here.
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        this.startActivity(intent);
+
+        NotificationChannel notificationChannel;
+        NotificationManager notificationManager;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            notificationChannel = new NotificationChannel("indoor_matching_channel_id", "indoor_matching_channel", NotificationManager.IMPORTANCE_DEFAULT);
+            notificationChannel.setDescription("Indoor Matching Notification Channel");
+            notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(notificationChannel);
+        }
+
+        NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(this);
+
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, "indoor_matching_channel_id")
+                .setSmallIcon(R.drawable.color_circle)
+                .setContentTitle("Indoor Matching")
+                .setContentText("This establishment supports this application. Click to open the app!")
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setVibrate(new long[]{100L, 0L})
+                .setContentIntent(PendingIntent.getActivity(this, 0, intent, 0));
+
+        Log.d("NOTIFICATION", "NOTIFY!");
+
+        notificationManagerCompat.notify(1, notificationBuilder.build());
+
     }
 
     @Override
