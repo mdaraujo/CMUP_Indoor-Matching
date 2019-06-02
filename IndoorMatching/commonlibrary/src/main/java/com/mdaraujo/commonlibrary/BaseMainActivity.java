@@ -36,6 +36,7 @@ import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
 import org.altbeacon.beacon.powersave.BackgroundPowerSaver;
 import org.altbeacon.beacon.service.ArmaRssiFilter;
+import org.altbeacon.beacon.service.RunningAverageRssiFilter;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -96,11 +97,11 @@ public class BaseMainActivity extends AppCompatActivity implements BeaconConsume
 
         firestoreDb = FirebaseFirestore.getInstance();
 
-//        BeaconManager.setRssiFilterImplClass(RunningAverageRssiFilter.class);
-//        RunningAverageRssiFilter.setSampleExpirationMilliseconds(100L);
+        BeaconManager.setRssiFilterImplClass(RunningAverageRssiFilter.class);
+        RunningAverageRssiFilter.setSampleExpirationMilliseconds(2500L);
 
-        BeaconManager.setRssiFilterImplClass(ArmaRssiFilter.class);
-        ArmaRssiFilter.setDEFAULT_ARMA_SPEED(0.4);
+//        BeaconManager.setRssiFilterImplClass(ArmaRssiFilter.class);
+//        ArmaRssiFilter.setDEFAULT_ARMA_SPEED(0.4);
 
         mBeaconManager = BeaconManager.getInstanceForApplication(this.getApplicationContext());
         mBeaconManager.getBeaconParsers().add(new BeaconParser().
@@ -176,7 +177,13 @@ public class BaseMainActivity extends AppCompatActivity implements BeaconConsume
         }
 
         if (foundBeacons.size() > 0) {
-            Collections.sort(beaconsInfo, (o1, o2) -> o1.getInstanceId().compareTo(o2.getInstanceId()));
+            Collections.sort(beaconsInfo, (o1, o2) -> {
+                if (o1.getRoomKey() != null && o2.getRoomKey() == null)
+                    return -1;
+                if (o2.getRoomKey() != null && o1.getRoomKey() == null)
+                    return 1;
+                return o1.getInstanceId().compareTo(o2.getInstanceId());
+            });
 
             List<BeaconInfo> knownBeacons = new ArrayList<>();
 

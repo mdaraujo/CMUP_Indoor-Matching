@@ -17,8 +17,8 @@ public class PositionEstimation {
     private static final int nRandomGuesses = 50;
     private static final int nInformedGuesses = 150;
     private static final float informedRange = 1.5f;
-    private static final float maxInfluence = 0.1f;
-    private static final float minInfluence = 0.03f;
+    private static final float maxInfluence = 0.2f;
+    private static final float minInfluence = 0.08f;
 
     private PointF avgPosition;
     private double avgConfidence;
@@ -119,7 +119,7 @@ public class PositionEstimation {
             for (BeaconInfo beacon : beaconsWithDistance) {
                 double hDist = Math.sqrt(Math.pow(beacon.getPosX() - hx, 2) + Math.pow(beacon.getPosY() - hy, 2));
                 prob *= (1 / (10 * Math.pow(1 - (hDist / beacon.getDistance()), 2) + 1));
-                prob *= Math.sqrt(10) / ((beacon.getDistance() * Math.PI) + 1);
+//                prob *= Math.sqrt(10) / ((beacon.getDistance() * Math.PI) + 1);
 //                    Log.d(TAG, String.format("HDist: %f, Beacon Dist: %f", hDist, beacon.getDistance()));
 //                    Log.d(TAG, String.format("Prob Intern: %f", 1 / (10 * Math.pow(1 - (hDist / beacon.getDistance()), 2) + 1)));
             }
