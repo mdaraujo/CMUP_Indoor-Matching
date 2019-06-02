@@ -53,7 +53,7 @@ public class BaseMainActivity extends AppCompatActivity implements BeaconConsume
     private static String phoneItemName = "Phone";
     private static int phoneItemColor = Color.BLACK;
 
-    //    private BackgroundPowerSaver backgroundPowerSaver;
+    private BackgroundPowerSaver backgroundPowerSaver;
     protected BeaconManager mBeaconManager;
     protected FirebaseFirestore firestoreDb;
     protected FirebaseUser user;
@@ -93,7 +93,7 @@ public class BaseMainActivity extends AppCompatActivity implements BeaconConsume
         verifyBluetooth();
 
         // enables auto battery saving of about 60%
-//        backgroundPowerSaver = new BackgroundPowerSaver(this);
+        backgroundPowerSaver = new BackgroundPowerSaver(this);
 
         firestoreDb = FirebaseFirestore.getInstance();
 
