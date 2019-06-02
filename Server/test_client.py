@@ -2,6 +2,7 @@ import time
 import json
 import random
 import string
+from datetime import datetime
 import paho.mqtt.client as mqtt  # import the client1
 
 
@@ -20,7 +21,6 @@ user_topic = "users/" + user_id
 
 match_x = 5
 match_y = 5
-dist_to_match = 4
 
 
 def on_connect(client, userdata, flags, rc):
@@ -75,6 +75,9 @@ def main():
 
     sendMsg(client, msg)
 
+    dist_to_match = 4.5
+    last_time = datetime.now()
+
     while True:
 
         msg = {
@@ -86,7 +89,14 @@ def main():
 
         sendMsg(client, msg)
 
-        time.sleep(1)
+        time.sleep(0.4)
+
+        time_diff = datetime.now() - last_time
+
+        if time_diff.total_seconds() > 3:
+            last_time = datetime.now()
+            dist_to_match -= 1
+            print("\n\ndist_to_match:", dist_to_match)
 
 
 if __name__ == "__main__":

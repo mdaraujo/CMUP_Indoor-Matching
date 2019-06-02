@@ -7,7 +7,8 @@ import paho.mqtt.client as mqtt
 BROKER_ADDRESS = "localhost"
 GATEWAY_TOPIC = "gateway_service"
 MAX_INACTIVITY_TIME = 8
-MIN_SIMILARITY = 0.6
+# MIN_SIMILARITY = 0.6
+MIN_COMMON_ITEMS = 5
 
 MSG_TYPE_USER_INFO = 0
 MSG_TYPE_USER_POS = 1
@@ -50,7 +51,8 @@ class User:
         return json.dumps(msg)
 
     def __str__(self):
-        return "User ID: {}, Name: {}, X: {}, Y: {}, Match ID: {}".format(self.uid, self.name, self.x, self.y, self.match_id)
+        return "User ID: {}, Name: {}, X: {}, Y: {}, Match ID: {}, Timestamp: {}".format(
+            self.uid, self.name, self.x, self.y, self.match_id, self.timestamp)
 
 
 def print_users():
@@ -77,12 +79,12 @@ def matchUser(user_id):
 
             intersection = user.interests & other_user.interests
 
-            similarity = len(intersection) / \
-                min(len(user.interests), len(other_user.interests))
+            # similarity = len(intersection) / \
+            #     min(len(user.interests), len(other_user.interests))
 
-            print("similarity:", similarity)
+            print("len(intersection):", len(intersection))
 
-            if similarity > MIN_SIMILARITY:
+            if len(intersection) > MIN_COMMON_ITEMS:
                 user.match_id = uid
                 other_user.match_id = user_id
                 sendInfoToMatch(user)
@@ -107,7 +109,7 @@ def sendMsgTypeToUser(user_id, msg_type):
     }
     user_topic = "users/" + user_id
     json_msg = json.dumps(msg)
-    print("Publishing LEAVE message to topic",
+    print("Publishing message to topic",
           user_topic, json_msg, sep=" : ")
     print()
     client.publish(user_topic, json_msg)
@@ -183,7 +185,7 @@ def main():
     client.on_connect = on_connect
     client.on_message = on_message
 
-    client.connect(BROKER_ADDRESS, 1883, 60)
+    client.connect(BROKER_ADDRESS, 1883, keepalive=0)
 
     # Blocking call that processes network traffic, dispatches callbacks and
     # handles reconnecting.

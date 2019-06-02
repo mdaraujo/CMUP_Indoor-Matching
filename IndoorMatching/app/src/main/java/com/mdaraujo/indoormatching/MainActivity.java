@@ -104,6 +104,7 @@ public class MainActivity extends BaseMainActivity {
 
         matchItemColorView.setColorFilter(Color.WHITE);
         matchItemNameView.setText(R.string.server_waiting);
+        matchItemCoordsView.setText("");
 
         vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
     }
@@ -114,6 +115,7 @@ public class MainActivity extends BaseMainActivity {
             encodedPayload = payload.getBytes("UTF-8");
             MqttMessage message = new MqttMessage(encodedPayload);
             client.publish(topic, message);
+            Log.d(TAG, "Sending Message: " + payload);
         } catch (UnsupportedEncodingException | MqttException e) {
             Log.d(TAG, e.getMessage());
             e.printStackTrace();
@@ -136,7 +138,7 @@ public class MainActivity extends BaseMainActivity {
 
             @Override
             public void connectionLost(Throwable throwable) {
-
+                Log.w(TAG, throwable.getMessage());
             }
 
             @Override
@@ -178,12 +180,12 @@ public class MainActivity extends BaseMainActivity {
                 } else if (msgType == MSG_TYPE_PROXIMITY_FAR) {
                     if (!alreadyFar) {
                         matchItemCoordsView.setText("Close");
-                        vibrator.vibrate(new long[]{0, 400, 100, 400}, -1);
+                        vibrator.vibrate(new long[]{0, 500, 200, 500}, -1);
                         alreadyFar = true;
                     }
                 } else if (msgType == MSG_TYPE_PROXIMITY_CLOSE) {
                     matchItemCoordsView.setText("Very Close");
-                    vibrator.vibrate(new long[]{0, 800, 200, 800}, -1);
+                    vibrator.vibrate(new long[]{0, 800, 200, 800, 200, 800}, -1);
                 }
             }
 
@@ -247,6 +249,15 @@ public class MainActivity extends BaseMainActivity {
             Log.w(TAG, "Exception while subscribing");
             ex.printStackTrace();
         }
+    }
+
+    @Override
+    protected void refreshScan() {
+        super.refreshScan();
+
+        matchItemColorView.setColorFilter(Color.WHITE);
+        matchItemNameView.setText(R.string.server_waiting);
+        matchItemCoordsView.setText("");
     }
 
     @Override
