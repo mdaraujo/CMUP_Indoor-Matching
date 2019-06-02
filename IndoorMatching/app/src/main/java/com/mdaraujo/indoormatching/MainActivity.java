@@ -1,9 +1,13 @@
 package com.mdaraujo.indoormatching;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PointF;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -303,6 +307,13 @@ public class MainActivity extends BaseMainActivity {
                 if (mBeaconManager.isBound(this)) {
                     mBeaconManager.unbind(this);
                 }
+
+                Vibrator v = null;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                    v.vibrate(VibrationEffect.createWaveform(new long[]{0, 200, 100, 200, 100, 200}, -1));
+                }
+
                 refreshScan();
                 return true;
             case R.id.user_profile:

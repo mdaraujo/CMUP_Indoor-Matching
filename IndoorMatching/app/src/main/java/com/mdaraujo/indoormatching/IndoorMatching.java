@@ -77,6 +77,7 @@ public class IndoorMatching extends Application implements BootstrapNotifier {
                 .setContentText("This establishment supports this application. Click to open the app!")
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setVibrate(new long[]{100L, 0L})
+                .setAutoCancel(true)
                 .setContentIntent(PendingIntent.getActivity(this, 0, intent, 0));
 
         Log.d("NOTIFICATION", "NOTIFY!");
