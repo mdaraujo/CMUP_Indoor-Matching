@@ -22,7 +22,6 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.mdaraujo.indoormatching.Database.Category.FacebookData;
 
 import org.json.JSONException;
 

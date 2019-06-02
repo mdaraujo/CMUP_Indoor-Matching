@@ -20,7 +20,6 @@ import com.mdaraujo.commonlibrary.RecyclerViewClickListener;
 import com.mdaraujo.indoormatching.Database.Category.Category;
 import com.mdaraujo.indoormatching.Database.Category.CategoryAdapter;
 import com.mdaraujo.indoormatching.Database.Category.CategoryViewModel;
-import com.mdaraujo.indoormatching.Database.Category.FacebookData;
 import com.mdaraujo.indoormatching.Database.Interest.InterestViewModel;
 import com.mdaraujo.indoormatching.Database.Item.Item;
 import com.mdaraujo.indoormatching.Database.Item.ItemViewModel;

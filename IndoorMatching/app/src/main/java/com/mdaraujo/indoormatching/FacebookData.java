@@ -1,4 +1,4 @@
-package com.mdaraujo.indoormatching.Database.Category;
+package com.mdaraujo.indoormatching;
 
 import android.app.Application;
 import android.os.Bundle;

@@ -4,9 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PointF;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.Menu;
@@ -26,6 +24,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.mdaraujo.commonlibrary.BaseMainActivity;
 import com.mdaraujo.commonlibrary.model.BeaconInfo;
 import com.mdaraujo.commonlibrary.model.Room;
+import com.mdaraujo.indoormatching.Database.AppRepository;
 
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.Region;
@@ -37,11 +36,13 @@ import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Collection;
+import java.util.List;
 
 import static com.mdaraujo.commonlibrary.model.BeaconInfo.BEACONS_COLLECTION_NAME;
 import static com.mdaraujo.commonlibrary.model.Room.ROOMS_COLLECTION_NAME;
@@ -61,8 +62,8 @@ public class MainActivity extends BaseMainActivity {
     private static int MSG_TYPE_PROXIMITY_FAR = 3;
     private static int MSG_TYPE_PROXIMITY_CLOSE = 4;
 
-    private static int PROXIMITY_FAR = 6;
-    private static int PROXIMITY_CLOSE = 2;
+    private AppRepository appRepository;
+    private List<Long> userInterests;
 
     private String userTopic;
     private MqttAndroidClient client;
@@ -83,6 +84,12 @@ public class MainActivity extends BaseMainActivity {
             finish();
         }
 
+        appRepository = new AppRepository(getApplication());
+
+        appRepository.getUserInterests(user.getUid()).observe(this, interests -> {
+            userInterests = interests;
+        });
+
         userTopic = "users/" + user.getUid();
 
         fillBaseLayout();
@@ -92,8 +99,8 @@ public class MainActivity extends BaseMainActivity {
         matchItemNameView = matchItemView.findViewById(R.id.beacon_name);
         matchItemCoordsView = matchItemView.findViewById(R.id.beacon_coords);
 
-        mBeaconManager.setBackgroundScanPeriod(400L);
-        mBeaconManager.setBackgroundBetweenScanPeriod(1000L);
+//        mBeaconManager.setBackgroundScanPeriod(400L);
+//        mBeaconManager.setBackgroundBetweenScanPeriod(1000L);
 
         matchItemColorView.setColorFilter(Color.WHITE);
         matchItemNameView.setText(R.string.server_waiting);
@@ -158,7 +165,7 @@ public class MainActivity extends BaseMainActivity {
                         match.setInstanceId(MATCH_INSTANCE);
                         match.setRoomKey(MATCH_INSTANCE);
                         beaconsInfo.add(match);
-                        vibrator.vibrate(new long[]{0, 200, 100, 200, 100, 200}, -1);
+                        vibrator.vibrate(new long[]{0, 300, 100, 300, 100, 300, 100, 300}, -1);
                     }
                 } else if (msgType == MSG_TYPE_MATCH_LEAVE) {
                     matchItemColorView.setColorFilter(Color.WHITE);
@@ -170,13 +177,13 @@ public class MainActivity extends BaseMainActivity {
 
                 } else if (msgType == MSG_TYPE_PROXIMITY_FAR) {
                     if (!alreadyFar) {
-                        matchItemCoordsView.setText(PROXIMITY_FAR + "m");
-                        vibrator.vibrate(new long[]{0, 200, 100, 200, 100, 200}, -1);
+                        matchItemCoordsView.setText("Close");
+                        vibrator.vibrate(new long[]{0, 400, 100, 400}, -1);
                         alreadyFar = true;
                     }
                 } else if (msgType == MSG_TYPE_PROXIMITY_CLOSE) {
-                    matchItemCoordsView.setText(PROXIMITY_CLOSE + "m");
-                    vibrator.vibrate(new long[]{0, 200, 100, 200, 100, 200}, -1);
+                    matchItemCoordsView.setText("Very Close");
+                    vibrator.vibrate(new long[]{0, 800, 200, 800}, -1);
                 }
             }
 
@@ -198,6 +205,7 @@ public class MainActivity extends BaseMainActivity {
                         userInfoMsg.put("msgType", MSG_TYPE_USER_INFO);
                         userInfoMsg.put("userId", user.getUid());
                         userInfoMsg.put("name", user.getDisplayName());
+                        userInfoMsg.put("interests", new JSONArray(userInterests));
 
                     } catch (JSONException e) {
                         e.printStackTrace();

@@ -69,7 +69,8 @@ def main():
     msg = {
         "msgType": 0,
         "userId": user_id,
-        "name": "Name of " + user_id
+        "name": "Name of " + user_id,
+        "interests": [3, 7, 13, 15, 5943153747, 9991232322, 10045457582]
     }
 
     sendMsg(client, msg)

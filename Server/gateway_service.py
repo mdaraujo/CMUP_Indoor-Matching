@@ -6,7 +6,8 @@ import paho.mqtt.client as mqtt
 
 BROKER_ADDRESS = "localhost"
 GATEWAY_TOPIC = "gateway_service"
-MAX_INACTIVITY_TIME = 5
+MAX_INACTIVITY_TIME = 8
+MIN_SIMILARITY = 0.6
 
 MSG_TYPE_USER_INFO = 0
 MSG_TYPE_USER_POS = 1
@@ -14,8 +15,8 @@ MSG_TYPE_MATCH_LEAVE = 2
 MSG_TYPE_PROXIMITY_FAR = 3
 MSG_TYPE_PROXIMITY_CLOSE = 4
 
-PROXIMITY_FAR = 6
-PROXIMITY_CLOSE = 2
+PROXIMITY_FAR = 5
+PROXIMITY_CLOSE = 1
 
 client = mqtt.Client()
 
@@ -23,13 +24,13 @@ users = {}
 
 
 class User:
-    def __init__(self, uid, name):
+    def __init__(self, uid, name, interests):
         self.uid = uid
         self.name = name
         self.x = None
         self.y = None
         self.match_id = None
-        self.interests = None
+        self.interests = interests
         self.timestamp = datetime.now()
 
     def setPos(self, x, y):
@@ -68,17 +69,30 @@ def checkUserInactivity(user_id):
 
 
 def matchUser(user_id):
+    user = users[user_id]
     for uid, other_user in users.items():
         if uid != user_id and other_user.match_id is None:
             if checkUserInactivity(other_user.uid):
                 continue
 
-            users[user_id].match_id = uid
-            other_user.match_id = user_id
-            sendInfoToMatch(users[user_id])
+            intersection = user.interests & other_user.interests
+
+            similarity = len(intersection) / \
+                min(len(user.interests), len(other_user.interests))
+
+            print("similarity:", similarity)
+
+            if similarity > MIN_SIMILARITY:
+                user.match_id = uid
+                other_user.match_id = user_id
+                sendInfoToMatch(user)
+                sendInfoToMatch(other_user)
+                break
 
 
 def sendInfoToMatch(user):
+    if user.x is None:
+        return
     match_topic = "users/" + user.match_id
     json_msg = user.to_json()
     print("Publishing message to topic",
@@ -124,11 +138,12 @@ def on_message(client, userdata, msg):
         if user:
             user.x = None
             user.y = None
-            # user.interests = json_msg['interests']
+            user.interests = set(json_msg['interests'])
             user.name = json_msg['name']
             user.timestamp = datetime.now()
         else:
-            users[user_id] = User(user_id, json_msg['name'])
+            users[user_id] = User(
+                user_id, json_msg['name'], set(json_msg['interests']))
 
     elif msg_type == MSG_TYPE_USER_POS:                         # update user position
         user = users.get(user_id, None)
