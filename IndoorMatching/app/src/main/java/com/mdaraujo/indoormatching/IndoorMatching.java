@@ -1,11 +1,11 @@
 package com.mdaraujo.indoormatching;
 
-import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Build;
+import android.support.multidex.MultiDexApplication;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
@@ -18,7 +18,7 @@ import org.altbeacon.beacon.Region;
 import org.altbeacon.beacon.startup.BootstrapNotifier;
 import org.altbeacon.beacon.startup.RegionBootstrap;
 
-public class IndoorMatching extends Application implements BootstrapNotifier {
+public class IndoorMatching extends MultiDexApplication implements BootstrapNotifier {
     private static final String TAG = "IndoorMatchingApp";
     private RegionBootstrap regionBootstrap;
 
