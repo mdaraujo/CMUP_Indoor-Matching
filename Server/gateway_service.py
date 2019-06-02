@@ -28,13 +28,15 @@ class User:
 
     def to_json(self):
         """ Convert to a json object. """
-        user_dict = {}
-        user_dict['id'] = self.uid
-        user_dict['name'] = self.name
-        user_dict['x'] = self.x
-        user_dict['y'] = self.y
-        user_dict['matchId'] = self.match_id
-        return json.dumps(user_dict)
+        msg = {
+            "msgType": 1,
+            "id": self.uid,
+            "name": self.name,
+            "x": self.x,
+            "y": self.y,
+            "matchId": self.match_id
+        }
+        return json.dumps(msg)
 
     def __str__(self):
         return "User ID: {}, Name: {}, X: {}, Y: {}, Match ID: {}".format(self.uid, self.name, self.x, self.y, self.match_id)
@@ -75,6 +77,18 @@ def sendInfoToMatch(user):
     client.publish(match_topic, json_msg)
 
 
+def sendMatchLeaveMsg(user_id):
+    msg = {
+        "msgType": 2
+    }
+    user_topic = "users/" + user_id
+    json_msg = json.dumps(msg)
+    print("Publishing LEAVE message to topic",
+          user_topic, json_msg, sep=" : ")
+    print()
+    client.publish(user_topic, json_msg)
+
+
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code " + str(rc))
     print("Subscribing messages to topic", GATEWAY_TOPIC)
@@ -111,6 +125,7 @@ def on_message(client, userdata, msg):
             if user.match_id is not None:
                 # check match timestamp
                 if checkUserInactivity(user.match_id):
+                    sendMatchLeaveMsg(user_id)
                     user.match_id = None
                     matchUser(user_id)
                 else:

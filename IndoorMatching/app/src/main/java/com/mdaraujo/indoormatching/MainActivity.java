@@ -47,7 +47,12 @@ public class MainActivity extends BaseMainActivity {
     private static String TAG = "MainActivity";
 
     private static String GATEWAY_TOPIC = "gateway_service";
-    private static int matchItemColor = Color.RED;
+    private static int MATCH_ITEM_COLOR = Color.RED;
+    private static String MATCH_INSTANCE = "match";
+
+    private static int MSG_TYPE_USER_INFO = 0;
+    private static int MSG_TYPE_USER_POS = 1;
+    private static int MSG_TYPE_MATCH_LEAVE = 2;
 
     private String userTopic;
 
@@ -96,7 +101,7 @@ public class MainActivity extends BaseMainActivity {
     }
 
     private void connectToMqtt() {
-        if (room == null || client != null)
+        if (room == null)
             return;
 
         String clientId = MqttClient.generateClientId();
@@ -120,25 +125,32 @@ public class MainActivity extends BaseMainActivity {
 
                 JSONObject msg = new JSONObject(mqttMessage.toString());
 
-                String matchName = msg.getString("name");
-                float x = (float) msg.getDouble("x");
-                float y = (float) msg.getDouble("y");
+                int msgType = msg.getInt("msgType");
 
-                matchItemNameView.setText(matchName);
-                matchItemColorView.setColorFilter(matchItemColor);
+                if (msgType == MSG_TYPE_USER_POS) {
+                    String matchName = msg.getString("name");
+                    float x = (float) msg.getDouble("x");
+                    float y = (float) msg.getDouble("y");
 
-                BeaconInfo matchCircle = getBeaconFromList("match");
+                    matchItemNameView.setText(matchName);
+                    matchItemColorView.setColorFilter(MATCH_ITEM_COLOR);
 
-                if (matchCircle != null) {
-                    matchCircle.setPosX(x);
-                    matchCircle.setPosY(y);
-                } else {
-                    BeaconInfo match = new BeaconInfo(matchName, matchItemColor, x, y);
-                    match.setInstanceId("match");
-                    match.setRoomKey("match");
-                    beaconsInfo.add(match);
+                    BeaconInfo matchCircle = getBeaconFromList(MATCH_INSTANCE);
+
+                    if (matchCircle != null) {
+                        matchCircle.setPosX(x);
+                        matchCircle.setPosY(y);
+                    } else {
+                        BeaconInfo match = new BeaconInfo(matchName, MATCH_ITEM_COLOR, x, y);
+                        match.setInstanceId(MATCH_INSTANCE);
+                        match.setRoomKey(MATCH_INSTANCE);
+                        beaconsInfo.add(match);
+                    }
+                } else if (msgType == MSG_TYPE_MATCH_LEAVE) {
+                    matchItemColorView.setColorFilter(Color.WHITE);
+                    matchItemNameView.setText(R.string.match_not_found);
+                    beaconsInfo.remove(getBeaconFromList(MATCH_INSTANCE));
                 }
-
             }
 
             @Override
@@ -156,7 +168,7 @@ public class MainActivity extends BaseMainActivity {
                     subscribeToTopic();
                     JSONObject userInfoMsg = new JSONObject();
                     try {
-                        userInfoMsg.put("msgType", 0);
+                        userInfoMsg.put("msgType", MSG_TYPE_USER_INFO);
                         userInfoMsg.put("userId", user.getUid());
                         userInfoMsg.put("name", user.getDisplayName());
 
@@ -164,6 +176,7 @@ public class MainActivity extends BaseMainActivity {
                         e.printStackTrace();
                     }
                     sendMessage(GATEWAY_TOPIC, userInfoMsg.toString());
+                    matchItemColorView.setColorFilter(Color.WHITE);
                     matchItemNameView.setText(R.string.match_not_found);
                 }
 
@@ -208,7 +221,7 @@ public class MainActivity extends BaseMainActivity {
         if (position != null) {
             JSONObject userInfoMsg = new JSONObject();
             try {
-                userInfoMsg.put("msgType", 1);
+                userInfoMsg.put("msgType", MSG_TYPE_USER_POS);
                 userInfoMsg.put("userId", user.getUid());
                 userInfoMsg.put("x", position.x);
                 userInfoMsg.put("y", position.y);
