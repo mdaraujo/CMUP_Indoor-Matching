@@ -1,4 +1,5 @@
 import json
+import math
 from datetime import datetime
 import paho.mqtt.client as mqtt
 
@@ -6,6 +7,15 @@ import paho.mqtt.client as mqtt
 BROKER_ADDRESS = "localhost"
 GATEWAY_TOPIC = "gateway_service"
 MAX_INACTIVITY_TIME = 5
+
+MSG_TYPE_USER_INFO = 0
+MSG_TYPE_USER_POS = 1
+MSG_TYPE_MATCH_LEAVE = 2
+MSG_TYPE_PROXIMITY_FAR = 3
+MSG_TYPE_PROXIMITY_CLOSE = 4
+
+PROXIMITY_FAR = 6
+PROXIMITY_CLOSE = 2
 
 client = mqtt.Client()
 
@@ -29,7 +39,7 @@ class User:
     def to_json(self):
         """ Convert to a json object. """
         msg = {
-            "msgType": 1,
+            "msgType": MSG_TYPE_USER_POS,
             "id": self.uid,
             "name": self.name,
             "x": self.x,
@@ -77,9 +87,9 @@ def sendInfoToMatch(user):
     client.publish(match_topic, json_msg)
 
 
-def sendMatchLeaveMsg(user_id):
+def sendMsgTypeToUser(user_id, msg_type):
     msg = {
-        "msgType": 2
+        "msgType": msg_type
     }
     user_topic = "users/" + user_id
     json_msg = json.dumps(msg)
@@ -87,6 +97,10 @@ def sendMatchLeaveMsg(user_id):
           user_topic, json_msg, sep=" : ")
     print()
     client.publish(user_topic, json_msg)
+
+
+def getDistance(user1, user2):
+    return math.sqrt(math.pow(user1.x - user2.x, 2) + math.pow(user1.y - user2.y, 2))
 
 
 def on_connect(client, userdata, flags, rc):
@@ -116,7 +130,7 @@ def on_message(client, userdata, msg):
         else:
             users[user_id] = User(user_id, json_msg['name'])
 
-    elif msg_type == 1:                         # update user position
+    elif msg_type == MSG_TYPE_USER_POS:                         # update user position
         user = users.get(user_id, None)
         if user:
             user.setPos(json_msg['x'], json_msg['y'])
@@ -125,13 +139,24 @@ def on_message(client, userdata, msg):
             if user.match_id is not None:
                 # check match timestamp
                 if checkUserInactivity(user.match_id):
-                    sendMatchLeaveMsg(user_id)
+                    sendMsgTypeToUser(user_id, MSG_TYPE_MATCH_LEAVE)
                     user.match_id = None
                     matchUser(user_id)
                 else:
                     # send new info to match
                     sendInfoToMatch(user)
+                    dist_to_match = getDistance(user, users[user.match_id])
+                    if dist_to_match < PROXIMITY_CLOSE:
+                        sendMsgTypeToUser(user_id, MSG_TYPE_PROXIMITY_CLOSE)
+                        sendMsgTypeToUser(
+                            user.match_id, MSG_TYPE_PROXIMITY_CLOSE)
+                        del users[user_id]
+                        del users[user.match_id]
 
+                    elif dist_to_match < PROXIMITY_FAR:
+                        sendMsgTypeToUser(user_id, MSG_TYPE_PROXIMITY_FAR)
+                        sendMsgTypeToUser(
+                            user.match_id, MSG_TYPE_PROXIMITY_FAR)
             else:
                 # match user with similar available user
                 matchUser(user_id)

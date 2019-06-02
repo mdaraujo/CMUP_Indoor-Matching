@@ -58,9 +58,16 @@ public class MainActivity extends BaseMainActivity {
     private static int MSG_TYPE_USER_POS = 1;
     private static int MSG_TYPE_MATCH_LEAVE = 2;
 
-    private String userTopic;
+    private static int MSG_TYPE_PROXIMITY_FAR = 3;
+    private static int MSG_TYPE_PROXIMITY_CLOSE = 4;
 
+    private static int PROXIMITY_FAR = 6;
+    private static int PROXIMITY_CLOSE = 2;
+
+    private String userTopic;
     private MqttAndroidClient client;
+    private Vibrator vibrator;
+    private boolean alreadyFar;
 
     protected ImageView matchItemColorView;
     protected TextView matchItemNameView;
@@ -90,6 +97,8 @@ public class MainActivity extends BaseMainActivity {
 
         matchItemColorView.setColorFilter(Color.WHITE);
         matchItemNameView.setText(R.string.server_waiting);
+
+        vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
     }
 
     private void sendMessage(String topic, String payload) {
@@ -149,11 +158,25 @@ public class MainActivity extends BaseMainActivity {
                         match.setInstanceId(MATCH_INSTANCE);
                         match.setRoomKey(MATCH_INSTANCE);
                         beaconsInfo.add(match);
+                        vibrator.vibrate(new long[]{0, 200, 100, 200, 100, 200}, -1);
                     }
                 } else if (msgType == MSG_TYPE_MATCH_LEAVE) {
                     matchItemColorView.setColorFilter(Color.WHITE);
                     matchItemNameView.setText(R.string.match_not_found);
                     beaconsInfo.remove(getBeaconFromList(MATCH_INSTANCE));
+                    matchItemCoordsView.setText("");
+                    alreadyFar = false;
+                    vibrator.vibrate(new long[]{0, 200, 100, 200, 100, 200}, -1);
+
+                } else if (msgType == MSG_TYPE_PROXIMITY_FAR) {
+                    if (!alreadyFar) {
+                        matchItemCoordsView.setText(PROXIMITY_FAR + "m");
+                        vibrator.vibrate(new long[]{0, 200, 100, 200, 100, 200}, -1);
+                        alreadyFar = true;
+                    }
+                } else if (msgType == MSG_TYPE_PROXIMITY_CLOSE) {
+                    matchItemCoordsView.setText(PROXIMITY_CLOSE + "m");
+                    vibrator.vibrate(new long[]{0, 200, 100, 200, 100, 200}, -1);
                 }
             }
 
@@ -182,6 +205,8 @@ public class MainActivity extends BaseMainActivity {
                     sendMessage(GATEWAY_TOPIC, userInfoMsg.toString());
                     matchItemColorView.setColorFilter(Color.WHITE);
                     matchItemNameView.setText(R.string.match_not_found);
+                    matchItemCoordsView.setText("");
+                    alreadyFar = false;
                 }
 
                 @Override
@@ -307,13 +332,6 @@ public class MainActivity extends BaseMainActivity {
                 if (mBeaconManager.isBound(this)) {
                     mBeaconManager.unbind(this);
                 }
-
-                Vibrator v = null;
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-                    v.vibrate(VibrationEffect.createWaveform(new long[]{0, 200, 100, 200, 100, 200}, -1));
-                }
-
                 refreshScan();
                 return true;
             case R.id.user_profile:

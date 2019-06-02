@@ -18,9 +18,9 @@ def randomString(stringLength):
 user_id = randomString(12)
 user_topic = "users/" + user_id
 
-match_x = 0
-match_y = 0
-dist_to_match = 2
+match_x = 5
+match_y = 5
+dist_to_match = 4
 
 
 def on_connect(client, userdata, flags, rc):
