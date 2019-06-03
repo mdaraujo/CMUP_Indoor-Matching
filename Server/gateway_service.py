@@ -128,7 +128,7 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     # print(msg.topic, str(msg.payload), sep=" : ")
 
-    json_msg = json.loads(msg.payload)
+    json_msg = json.loads((msg.payload).decode('utf-8'))
 
     print("\nReceived msg:", json_msg)
 
